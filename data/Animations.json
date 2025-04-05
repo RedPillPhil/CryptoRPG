@@ -1,7 +1,7 @@
 [
 null,
-{"id":1,"displayType":0,"effectName":"WaterAll2","flashTimings":[],"name":"Watering Can","offsetX":0,"offsetY":0,"rotation":{"x":0,"y":0,"z":0},"scale":10,"soundTimings":[],"speed":500},
-{"id":2,"displayType":0,"effectName":"Silence","flashTimings":[],"name":"Seeds","offsetX":0,"offsetY":0,"rotation":{"x":0,"y":0,"z":0},"scale":10,"soundTimings":[],"speed":500},
+{"id":1,"displayType":0,"effectName":"WaterAll2","flashTimings":[],"name":"Watering Can","offsetX":0,"offsetY":0,"rotation":{"x":0,"y":0,"z":0},"scale":10,"soundTimings":[],"speed":500,"timings":[]},
+{"id":2,"displayType":0,"effectName":"Silence","flashTimings":[],"name":"Seeds","offsetX":0,"offsetY":0,"rotation":{"x":0,"y":0,"z":0},"scale":10,"soundTimings":[],"speed":500,"timings":[]},
 {"id":3,"displayType":0,"effectName":"EarthOne1","flashTimings":[],"name":"Hammer","offsetX":0,"offsetY":0,"rotation":{"x":0,"y":0,"z":0},"scale":10,"soundTimings":[],"speed":1000},
 {"id":4,"displayType":0,"effectName":"EarthOne1","flashTimings":[],"name":"Axe","offsetX":0,"offsetY":0,"rotation":{"x":0,"y":0,"z":0},"scale":10,"soundTimings":[],"speed":1000},
 {"id":5,"displayType":0,"effectName":"","flashTimings":[],"name":"","offsetX":0,"offsetY":0,"rotation":{"x":0,"y":0,"z":0},"scale":100,"soundTimings":[],"speed":100},
