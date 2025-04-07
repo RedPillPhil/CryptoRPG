@@ -1,45 +1,53 @@
-/*
- * Plugin Name: BrowserSafePatch
- * Description: Patches common Node.js-related plugin issues for browser deployment.
- * Use this plugin if you're deploying your RPG Maker MZ project to a browser.
- * It neutralizes references to process, require, and other Node-only objects.
+/*:
+ * @plugindesc Browser Compatibility Fixes for Node-based plugins (SRD + FOSSIL) - v1.1
+ * @author GPT
+ *
+ * @help
+ * This patch prevents runtime errors in HTML deployment caused by plugins expecting
+ * Node.js features like `process`, `require`, or missing RPG Maker MV interfaces.
  */
 
 (() => {
-    // Suppress undefined 'process' references
-    if (typeof process === 'undefined') {
-        window.process = {}; // Fake process object
-    }
+  // Simulate 'process' for plugins like SRD_GameUpgrade
+  if (typeof process === 'undefined') {
+    window.process = { platform: 'browser', env: {} };
+  }
 
-    // Suppress undefined 'require' references
-    if (typeof require === 'undefined') {
-        window.require = function() {
-            console.warn("'require' is not supported in browser. Returning dummy module.");
-            return {};
-        };
-    }
+  // Simulate 'require' to prevent FOSSIL-related crashes
+  if (typeof require === 'undefined') {
+    window.require = function () {
+      console.warn('Dummy require() called – ignored in browser mode.');
+      return {};
+    };
+  }
 
-    // Patch SRD.FileManager placeholder (for SRD_CharacterCreatorEX)
-    if (!window.SRD || !SRD.FileManager) {
-        window.SRD = window.SRD || {};
-        SRD.FileManager = SRD.FileManager || {
-            checkDataExists: function() {
-                console.warn("SRD.FileManager.checkDataExists is not supported in browser.");
-                return false;
-            }
-        };
-    }
+  // Stub for FileManager.checkDataExists used in SRD_CharacterCreatorEX
+  if (!window.FileManager) window.FileManager = {};
+  if (!FileManager.checkDataExists) {
+    FileManager.checkDataExists = function (path) {
+      console.warn(`FileManager.checkDataExists(${path}) was called – returning false in browser.`);
+      return false;
+    };
+  }
 
-    // Optional: Patch StorageManager.exists for compatibility
-    if (StorageManager && !StorageManager.exists) {
-        StorageManager.exists = function(savefileId) {
-            try {
-                const data = localStorage.getItem(this.savefileKey(savefileId));
-                return !!data;
-            } catch (e) {
-                console.warn("StorageManager.exists error:", e);
-                return false;
-            }
-        };
-    }
+  // Patch for StorageManager.exists not being a function
+  if (!StorageManager.exists) {
+    StorageManager.exists = function (savefileId) {
+      try {
+        const key = StorageManager.localFileDirectoryPath() + "file" + savefileId + ".rpgsave";
+        return !!localStorage.getItem(key);
+      } catch (e) {
+        console.warn("StorageManager.exists failed:", e);
+        return false;
+      }
+    };
+  }
+
+  // Patch for Main.isPathRandomized (main.js error on filename)
+  if (!Main) window.Main = {};
+  if (!Main.isPathRandomized) {
+    Main.isPathRandomized = function () {
+      return false; // Assume it's not randomized in browser
+    };
+  }
 })();
