@@ -2,32 +2,31 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="viewport" content="user-scalable=no">
         <link rel="icon" href="icon/icon.png" type="image/png">
         <link rel="apple-touch-icon" href="icon/icon.png">
         <link rel="stylesheet" type="text/css" href="css/game.css">
         <title>Bagholderz Odyssey</title>
-    </head>
-    <body style="background-color: black">
-        <!-- EARLY FIXER BLOCK -->
+
+        <!-- EARLY FIXER PATCHES -->
         <script type="text/javascript">
-            // Patch 'process' if missing
+            // process patch
             if (typeof process === 'undefined') {
                 window.process = { env: { NODE_ENV: 'production' } };
                 console.log("🩹 Patched 'process' for browser");
             }
 
-            // Patch 'require' to prevent errors
+            // dummy require patch
             if (typeof require === 'undefined') {
                 window.require = function () {
                     console.warn("Dummy require() called – ignored in browser mode.");
-                    return {}; // Return dummy object
+                    return {};
                 };
             }
 
-            // Patch FileManager for CharacterCreatorEX browser compatibility
+            // FileManager patch
             if (typeof FileManager !== 'undefined' && !FileManager.checkDataExists) {
                 FileManager.checkDataExists = function () {
                     return true;
@@ -35,16 +34,35 @@
                 console.log("🩹 Patched FileManager.checkDataExists");
             }
 
-            // Patch Utils.filename to avoid FOSSIL filename read error
+            // nw.js patch
+            if (typeof nw === 'undefined') {
+                window.nw = { App: { argv: [] } };
+                console.log("🩹 Patched 'nw' for browser");
+            }
+
+            // pre-patch Utils.filename (may be overwritten)
             if (typeof Utils !== 'undefined' && !Utils.filename) {
                 Utils.filename = function (path) {
+                    if (!path) return "";
                     return path.split('/').pop();
                 };
-                console.log("🩹 Patched Utils.filename for browser");
+                console.log("🩹 Patched Utils.filename (pre)");
             }
         </script>
-
+    </head>
+    <body style="background-color: black">
         <!-- LOAD FOSSIL -->
         <script type="text/javascript" src="js/plugins/FOSSIL.js"></script>
+
+        <!-- LATE PATCH: re-apply filename patch in case FOSSIL overwrote it -->
+        <script type="text/javascript">
+            if (typeof Utils !== 'undefined') {
+                Utils.filename = function (path) {
+                    if (!path) return "";
+                    return path.split('/').pop();
+                };
+                console.log("🩹 Re-patched Utils.filename after FOSSIL load");
+            }
+        </script>
     </body>
 </html>
