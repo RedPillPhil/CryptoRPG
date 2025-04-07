@@ -337,8 +337,7 @@ Scene_Boot.prototype.start = function() {
 Scene_Boot.prototype.startNormalGame = function() {
     this.checkPlayerLocation();
     DataManager.setupNewGame();
-    SceneManager.goto(Scene_Map);
-    Window_TitleCommand.initCommandPosition();
+    SceneManager.goto(Scene_Map); // ⬅️ Skip the title and go straight to map
 };
 
 Scene_Boot.prototype.resizeScreen = function() {
