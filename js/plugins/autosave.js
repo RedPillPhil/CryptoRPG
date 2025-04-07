@@ -32,42 +32,39 @@
   };
 
   // === Boot Process: Load Autosave or Start New Game ===
- Scene_Boot.prototype.startNormalGame = function () {
+  Scene_Boot.prototype.startNormalGame = function () {
   this.checkPlayerLocation();
 
-  const tryAutoLoad = () => {
+  const tryAutoLoad = async () => {
     console.log("Checking for autosave...");
 
     if (StorageManager.exists(0)) {
       console.log("Autosave exists. Trying to load...");
 
-      const success = DataManager.loadGame(0);
-      if (success) {
+      try {
+        await DataManager.loadGame(0);
         console.log("Loaded autosave successfully.");
+        $gameSystem.onAfterLoad();
         SceneManager.goto(Scene_Map);
-        return;
-      } else {
-        console.warn("Failed to load autosave. Starting new game.");
+      } catch (e) {
+        console.warn("Failed to load autosave. Starting new game.", e);
+        DataManager.setupNewGame();
+        SceneManager.goto(Scene_Map);
       }
     } else {
       console.log("No autosave found. Starting new game.");
-    }
-
-    // fallback
-    DataManager.setupNewGame();
-    SceneManager.goto(Scene_Map);
-  };
-
-  // Wait until everything is ready — extra delay to avoid plugin interference
-  setTimeout(() => {
-    try {
-      tryAutoLoad();
-    } catch (e) {
-      console.error("Auto-load error:", e);
       DataManager.setupNewGame();
       SceneManager.goto(Scene_Map);
     }
-  }, 500); // half a second to be safe
+  };
+
+  setTimeout(() => {
+    tryAutoLoad().catch(e => {
+      console.error("Auto-load error:", e);
+      DataManager.setupNewGame();
+      SceneManager.goto(Scene_Map);
+    });
+  }, 500);
 };
 
 })();
