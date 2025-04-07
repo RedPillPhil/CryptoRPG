@@ -1,53 +1,79 @@
 /*:
- * @plugindesc Browser Compatibility Fixes for Node-based plugins (SRD + FOSSIL) - v1.1
+ * @plugindesc Fix browser-related errors from Node.js dependencies (FOSSIL + SRD Plugins) - v1.2
  * @author GPT
  *
  * @help
- * This patch prevents runtime errors in HTML deployment caused by plugins expecting
- * Node.js features like `process`, `require`, or missing RPG Maker MV interfaces.
+ * This patch fixes:
+ * - "process is not defined"
+ * - "require is not defined"
+ * - FileManager.checkDataExists
+ * - StorageManager.exists
+ * - FOSSIL writeNewIndexFile() error
+ * - Main.isPathRandomized filename error
  */
 
 (() => {
-  // Simulate 'process' for plugins like SRD_GameUpgrade
-  if (typeof process === 'undefined') {
+  // --- Patch process ---
+  if (typeof window.process === 'undefined') {
     window.process = { platform: 'browser', env: {} };
   }
 
-  // Simulate 'require' to prevent FOSSIL-related crashes
-  if (typeof require === 'undefined') {
+  // --- Patch require ---
+  if (typeof window.require === 'undefined') {
     window.require = function () {
       console.warn('Dummy require() called – ignored in browser mode.');
       return {};
     };
   }
 
-  // Stub for FileManager.checkDataExists used in SRD_CharacterCreatorEX
-  if (!window.FileManager) window.FileManager = {};
+  // --- Patch FileManager.checkDataExists ---
+  if (typeof window.FileManager === 'undefined') {
+    window.FileManager = {};
+  }
   if (!FileManager.checkDataExists) {
-    FileManager.checkDataExists = function (path) {
-      console.warn(`FileManager.checkDataExists(${path}) was called – returning false in browser.`);
+    FileManager.checkDataExists = function () {
+      console.warn("FileManager.checkDataExists() called – returning false.");
       return false;
     };
   }
 
-  // Patch for StorageManager.exists not being a function
+  // --- Patch StorageManager.exists ---
   if (!StorageManager.exists) {
     StorageManager.exists = function (savefileId) {
       try {
-        const key = StorageManager.localFileDirectoryPath() + "file" + savefileId + ".rpgsave";
+        const key = 'RPG File' + savefileId;
         return !!localStorage.getItem(key);
       } catch (e) {
-        console.warn("StorageManager.exists failed:", e);
+        console.warn("StorageManager.exists error:", e);
         return false;
       }
     };
   }
 
-  // Patch for Main.isPathRandomized (main.js error on filename)
-  if (!Main) window.Main = {};
-  if (!Main.isPathRandomized) {
-    Main.isPathRandomized = function () {
-      return false; // Assume it's not randomized in browser
+  // --- Patch FOSSIL.js writeNewIndexFile to avoid crash ---
+  if (typeof writeNewIndexFile === 'function') {
+    const originalWriteNewIndexFile = writeNewIndexFile;
+    writeNewIndexFile = function () {
+      try {
+        originalWriteNewIndexFile.apply(this, arguments);
+      } catch (e) {
+        console.warn("FOSSIL writeNewIndexFile error patched:", e);
+      }
     };
   }
+
+  // --- Patch main.js isPathRandomized filename issue ---
+  if (typeof Main === 'undefined') window.Main = {};
+  Main.isPathRandomized = function () {
+    try {
+      return !!Utils && Utils.filename && Utils.filename.includes('random');
+    } catch (e) {
+      console.warn("Main.isPathRandomized error:", e);
+      return false;
+    }
+  };
+
+  // --- Console cleanup ---
+  console.info("✅ BrowserFixes plugin loaded successfully.");
+
 })();
