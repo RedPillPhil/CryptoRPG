@@ -1,49 +1,53 @@
 /*:
- * @plugindesc 🩹 Full browser patch: handles process, require, FileManager, and filename issues (Load FIRST) — v2.1
+ * @plugindesc Browser Compatibility Fixes for Node-based plugins (SRD + FOSSIL) - v1.1
  * @author GPT
+ *
+ * @help
+ * This patch prevents runtime errors in HTML deployment caused by plugins expecting
+ * Node.js features like `process`, `require`, or missing RPG Maker MV interfaces.
  */
 
 (() => {
-  console.log("✅ BrowserFixes plugin loaded.");
-
-  // Patch 'process' (used by SRD plugins)
-  if (typeof window.process === "undefined") {
+  // Simulate 'process' for plugins like SRD_GameUpgrade
+  if (typeof process === 'undefined') {
     window.process = { platform: 'browser', env: {} };
-    console.log("🩹 Patched 'process' for browser");
   }
 
-  // Patch 'require' (used by FOSSIL.js)
-  if (typeof window.require === "undefined") {
+  // Simulate 'require' to prevent FOSSIL-related crashes
+  if (typeof require === 'undefined') {
     window.require = function () {
-      console.warn("🩹 Dummy require() called – ignored in browser mode.");
-      return {}; // safe fallback
+      console.warn('Dummy require() called – ignored in browser mode.');
+      return {};
     };
   }
 
-  // Patch FileManager for SRD_CharacterCreatorEX
-  if (typeof window.FileManager === "undefined") window.FileManager = {};
-  if (typeof FileManager.checkDataExists !== 'function') {
+  // Stub for FileManager.checkDataExists used in SRD_CharacterCreatorEX
+  if (!window.FileManager) window.FileManager = {};
+  if (!FileManager.checkDataExists) {
     FileManager.checkDataExists = function (path) {
-      console.log(`🩹 FileManager.checkDataExists('${path}') -> true`);
-      return true;
+      console.warn(`FileManager.checkDataExists(${path}) was called – returning false in browser.`);
+      return false;
     };
   }
 
-  // Force patch Utils.filename directly to avoid FOSSIL crash
-  if (typeof window.Utils === "undefined") window.Utils = {};
-  Object.defineProperty(Utils, 'filename', {
-    get: () => "index.html",
-    configurable: true
-  });
-  console.log("🩹 Patched Utils.filename");
+  // Patch for StorageManager.exists not being a function
+  if (!StorageManager.exists) {
+    StorageManager.exists = function (savefileId) {
+      try {
+        const key = StorageManager.localFileDirectoryPath() + "file" + savefileId + ".rpgsave";
+        return !!localStorage.getItem(key);
+      } catch (e) {
+        console.warn("StorageManager.exists failed:", e);
+        return false;
+      }
+    };
+  }
 
-  // Warn on deprecated meta
-  window.addEventListener('DOMContentLoaded', () => {
-    const meta = document.querySelector('meta[name="apple-mobile-web-app-capable"]');
-    if (meta) {
-      console.warn("⚠️ Deprecated meta tag. Use 'mobile-web-app-capable' instead.");
-    }
-  });
-
-  console.log("✅ BrowserFixes v2.1 fully applied!");
+  // Patch for Main.isPathRandomized (main.js error on filename)
+  if (!Main) window.Main = {};
+  if (!Main.isPathRandomized) {
+    Main.isPathRandomized = function () {
+      return false; // Assume it's not randomized in browser
+    };
+  }
 })();
