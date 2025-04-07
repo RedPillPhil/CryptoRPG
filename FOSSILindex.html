@@ -11,6 +11,40 @@
         <title>Bagholderz Odyssey</title>
     </head>
     <body style="background-color: black">
+        <!-- EARLY FIXER BLOCK -->
+        <script type="text/javascript">
+            // Patch 'process' if missing
+            if (typeof process === 'undefined') {
+                window.process = { env: { NODE_ENV: 'production' } };
+                console.log("🩹 Patched 'process' for browser");
+            }
+
+            // Patch 'require' to prevent errors
+            if (typeof require === 'undefined') {
+                window.require = function () {
+                    console.warn("Dummy require() called – ignored in browser mode.");
+                    return {}; // Return dummy object
+                };
+            }
+
+            // Patch FileManager for CharacterCreatorEX browser compatibility
+            if (typeof FileManager !== 'undefined' && !FileManager.checkDataExists) {
+                FileManager.checkDataExists = function () {
+                    return true;
+                };
+                console.log("🩹 Patched FileManager.checkDataExists");
+            }
+
+            // Patch Utils.filename to avoid FOSSIL filename read error
+            if (typeof Utils !== 'undefined' && !Utils.filename) {
+                Utils.filename = function (path) {
+                    return path.split('/').pop();
+                };
+                console.log("🩹 Patched Utils.filename for browser");
+            }
+        </script>
+
+        <!-- LOAD FOSSIL -->
         <script type="text/javascript" src="js/plugins/FOSSIL.js"></script>
     </body>
 </html>
