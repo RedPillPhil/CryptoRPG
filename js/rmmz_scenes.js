@@ -1,5 +1,5 @@
 //=============================================================================
-// rmmz_scenes.js v1.1.0
+// rmmz_scenes.js v1.1.1
 //=============================================================================
 
 //-----------------------------------------------------------------------------
@@ -337,7 +337,8 @@ Scene_Boot.prototype.start = function() {
 Scene_Boot.prototype.startNormalGame = function() {
     this.checkPlayerLocation();
     DataManager.setupNewGame();
-    SceneManager.goto(Scene_Map); // ⬅️ Skip the title and go straight to map
+    SceneManager.goto(Scene_Title);
+    Window_TitleCommand.initCommandPosition();
 };
 
 Scene_Boot.prototype.resizeScreen = function() {
