@@ -98,9 +98,9 @@
         <a target="_blank" href="https://fjolt.com/article/css-windows-98" class="desktop-item"><span class="icon"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgBAMAAACBVGfHAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAHlBMVEUAAACAgID//7QAAADAwMD///8AgIAAAIAAgAAAAP+MXRRYAAAAAXRSTlMAQObYZgAAAAFiS0dEBfhv6ccAAAAHdElNRQfiBhoANyCM1dKOAAAAkUlEQVQoz2NgYBCEAQYoEFKCAEUDdAFhdAFHAzSBEGE0gVCoErBAWpKSorGxMVwgzT0jCUg5wwTU3Do62lAEIirTmpEFUl0yy8qMkAVcJdJmIgukhUh0TkcWSJzZkY4ioDYzo7wcxZaZM6YVIwsolVcWG6EIKBmD+MgCEIBTYCYETBpoFYQERFzgACJgjAQYGADW/1JJ50I4UgAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxOC0wNi0yNlQwMDo1NTozMi0wNDowMA4ejnkAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTgtMDYtMjZUMDA6NTU6MzItMDQ6MDB/QzbFAAAAAElFTkSuQmCC" alt="" /></span><span class="text">Read Article</span></a>
     </div>
 <!-- This anchor tag will now appear centered in the entire screen -->
-<a href="#" 
-   class="desktop-item" 
-   onclick="startGameDirectly();" 
+<a href="#"
+   class="desktop-item"
+   onclick="startGameDirectly();"
    style="
      position: fixed;
      top: 40%;
@@ -110,12 +110,13 @@
      text-align: center;
    ">
   <span class="icon">
-    <img src="https://github.com/RedPillPhil/CryptoRPG/blob/main/BagholderzOdysseyIcon_.png?raw=true" 
-         alt="Bagholderz Odyssey Icon" 
+    <img src="https://github.com/RedPillPhil/CryptoRPG/blob/main/BagholderzOdysseyIcon_.png?raw=true"
+         alt="Bagholderz Odyssey Icon"
          style="width: 88px; height: 78px; image-rendering: pixelated;" />
   </span>
   <span class="text">Bagholderz Odyssey</span>
 </a>
+
 
     <div id="all-windows">
         <div class="window ie windows-box-shadow">
@@ -435,18 +436,47 @@
         <div id="time-options"></div>
     </div>
 </form>
+<!-- Embed RPG Maker MZ game -->
+<div id="gameContainer" style="width: 100vw; height: 100vh; display: none;"></div>
+
+<script src="js/rpg_core.js"></script>
+<script src="js/rpg_managers.js"></script>
+<script src="js/rpg_objects.js"></script>
+<script src="js/rpg_scenes.js"></script>
+<script src="js/rpg_sprites.js"></script>
+<script src="js/rpg_windows.js"></script>
+<script src="js/plugins.js"></script>
+<script src="js/main.js"></script>
+
 <script>
 function startGameDirectly() {
-  if (typeof SceneManager === "undefined") {
-    console.error("RPG Maker engine not loaded yet.");
-    return;
-  }
+  document.getElementById("gameContainer").style.display = "block";
 
-  // Bypass title and go directly to Map
-  DataManager.setupNewGame();
-  SceneManager.goto(Scene_Map);
+  // Hide desktop icons or background UI
+  document.getElementById("windows").style.display = "none";
+  document.body.style.overflow = "hidden";
+
+  // Create canvas
+  var canvas = document.createElement("canvas");
+  canvas.id = "GameCanvas";
+  canvas.style.width = "100%";
+  canvas.style.height = "100%";
+  document.getElementById("gameContainer").appendChild(canvas);
+
+  // Start the game
+  if (typeof SceneManager !== "undefined") {
+    DataManager.setupNewGame();
+    SceneManager.goto(Scene_Map);
+  } else {
+    // Delay start if not ready
+    window.addEventListener("load", function () {
+      DataManager.setupNewGame();
+      SceneManager.goto(Scene_Map);
+    });
+  }
 }
 </script>
+
 
 </body>
 </html>
