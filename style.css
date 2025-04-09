@@ -25,6 +25,11 @@ body {
     box-shadow: 0 -2px #fffdfc, 0 -4px #cce9eb;
 }
 
+#windows-bagholderz-input:not(:checked) ~ #bagholderz-window {
+  display: none;
+}
+
+
 #all-windows {
     position: absolute;
     top: 0;
