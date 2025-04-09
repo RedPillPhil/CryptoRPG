@@ -25,9 +25,16 @@ body {
     box-shadow: 0 -2px #fffdfc, 0 -4px #cce9eb;
 }
 
+/* Hide the window unless checkbox is checked */
 #windows-bagholderz-input:not(:checked) ~ #bagholderz-window {
   display: none;
 }
+
+/* Show when checkbox is checked */
+#windows-bagholderz-input:checked ~ #bagholderz-window {
+  display: block;
+}
+
 
 
 #all-windows {
