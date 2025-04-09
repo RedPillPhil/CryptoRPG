@@ -436,6 +436,25 @@
     </div>
 </form>
 
+<script>
+  function setBackgroundByScreen() {
+    const isMobile = window.innerHeight > window.innerWidth; // tall and thin = mobile
+    const body = document.body;
+
+    if (isMobile) {
+      body.style.backgroundImage = "url('memebackgroundMobile.pngg')";
+    } else {
+      body.style.backgroundImage = "url('memebackground.png')";
+    }
+  }
+
+  // Run on load
+  window.addEventListener("load", setBackgroundByScreen);
+
+  // Recheck on resize/orientation change
+  window.addEventListener("resize", setBackgroundByScreen);
+  window.addEventListener("orientationchange", setBackgroundByScreen);
+</script>
 
 
 </body>
