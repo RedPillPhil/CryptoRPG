@@ -456,6 +456,23 @@
   window.addEventListener("orientationchange", setBackgroundByScreen);
 </script>
 
+<script>
+  function adjustIconPosition() {
+    const isMobile = window.innerHeight > window.innerWidth;
+    const icon = document.getElementById('bag-icon');
+
+    if (isMobile) {
+      icon.style.top = '60%';  // Move icon lower for mobile
+    } else {
+      icon.style.top = '40%';  // Standard position for desktop
+    }
+  }
+
+  // Run on load and when screen changes
+  window.addEventListener('load', adjustIconPosition);
+  window.addEventListener('resize', adjustIconPosition);
+  window.addEventListener('orientationchange', adjustIconPosition);
+</script>
 
 </body>
 </html>
