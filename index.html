@@ -436,46 +436,7 @@
         <div id="time-options"></div>
     </div>
 </form>
-<!-- Embed RPG Maker MZ game -->
-<div id="gameContainer" style="width: 100vw; height: 100vh; display: none;"></div>
 
-<script src="js/rpg_core.js"></script>
-<script src="js/rpg_managers.js"></script>
-<script src="js/rpg_objects.js"></script>
-<script src="js/rpg_scenes.js"></script>
-<script src="js/rpg_sprites.js"></script>
-<script src="js/rpg_windows.js"></script>
-<script src="js/plugins.js"></script>
-<script src="js/main.js"></script>
-
-<script>
-function startGameDirectly() {
-  document.getElementById("gameContainer").style.display = "block";
-
-  // Hide desktop icons or background UI
-  document.getElementById("windows").style.display = "none";
-  document.body.style.overflow = "hidden";
-
-  // Create canvas
-  var canvas = document.createElement("canvas");
-  canvas.id = "GameCanvas";
-  canvas.style.width = "100%";
-  canvas.style.height = "100%";
-  document.getElementById("gameContainer").appendChild(canvas);
-
-  // Start the game
-  if (typeof SceneManager !== "undefined") {
-    DataManager.setupNewGame();
-    SceneManager.goto(Scene_Map);
-  } else {
-    // Delay start if not ready
-    window.addEventListener("load", function () {
-      DataManager.setupNewGame();
-      SceneManager.goto(Scene_Map);
-    });
-  }
-}
-</script>
 
 
 </body>
