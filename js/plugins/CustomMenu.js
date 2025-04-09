@@ -9,7 +9,7 @@
  */
 
 (() => {
-  const customMenuURL = "https://bagholderz.com/Title/index.html";
+  const customMenuURL = "https://bagholderz.com/";
 
   const _Scene_Title_start = Scene_Title.prototype.start;
   Scene_Title.prototype.start = function () {
