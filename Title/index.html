@@ -100,7 +100,7 @@
 <!-- This anchor tag will now appear centered in the entire screen -->
 <a href="#" 
    class="desktop-item" 
-   onclick="SceneManager.goto(Scene_Map);" 
+   onclick="startGameDirectly();" 
    style="
      position: fixed;
      top: 40%;
@@ -435,6 +435,18 @@
         <div id="time-options"></div>
     </div>
 </form>
+<script>
+function startGameDirectly() {
+  if (typeof SceneManager === "undefined") {
+    console.error("RPG Maker engine not loaded yet.");
+    return;
+  }
+
+  // Bypass title and go directly to Map
+  DataManager.setupNewGame();
+  SceneManager.goto(Scene_Map);
+}
+</script>
 
 </body>
 </html>
