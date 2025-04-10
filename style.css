@@ -1352,6 +1352,72 @@ textarea:focus {
     box-shadow: none;   
 }
 
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+  .bagzzie-window {
+    position: fixed;
+    top: 20%;
+    left: 30%;
+    width: 320px;
+    height: 400px;
+    background: #c0c0c0;
+    font-family: 'Press Start 2P', monospace;
+    display: none;
+    flex-direction: column;
+    z-index: 1000;
+  }
+
+  #bagzzie-window:checked ~ .bagzzie-window {
+    display: flex;
+  }
+
+  .chat-window {
+    flex: 1;
+    background: #fff;
+    border: 2px inset #999;
+    margin: 0.5rem;
+    padding: 0.5rem;
+    overflow-y: auto;
+    font-size: 8px;
+  }
+
+  .chat-input {
+    display: flex;
+    padding: 0.5rem;
+    background: #e0e0e0;
+  }
+
+  .chat-input input {
+    flex: 1;
+    padding: 4px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    border: 2px inset #999;
+    background: #fff;
+  }
+
+  .chat-input button {
+    padding: 4px 8px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    margin-left: 0.5rem;
+    border: 2px outset #999;
+    background: #c0c0c0;
+  }
+
+  .message {
+    margin: 0.25rem 0;
+  }
+
+  .message.bot {
+    color: blue;
+  }
+
+  .message.user {
+    color: green;
+    text-align: right;
+  }
+
 #shutdown-screen [for="shutdown-screen-input"] {
     position: absolute;
     top: 0;
