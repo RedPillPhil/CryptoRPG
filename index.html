@@ -523,5 +523,39 @@
   window.addEventListener('orientationchange', adjustForScreen);
 </script>
 
+<script>
+  function sendMessage() {
+    const input = document.getElementById('userInput');
+    const chatbox = document.getElementById('chatbox');
+    const text = input.value.trim();
+    if (!text) return;
+
+    const userMsg = document.createElement('div');
+    userMsg.className = 'message user';
+    userMsg.textContent = text;
+    chatbox.appendChild(userMsg);
+
+    const botMsg = document.createElement('div');
+    botMsg.className = 'message bot';
+    botMsg.textContent = getBagzzieReply(text);
+    chatbox.appendChild(botMsg);
+
+    input.value = '';
+    chatbox.scrollTop = chatbox.scrollHeight;
+  }
+
+  function getBagzzieReply(input) {
+    // Simple canned responses
+    const responses = [
+      "I hear you.",
+      "That sounds degenerate.",
+      "HODL on tight.",
+      "To the moon? Maybe.",
+      "Check the charts, fren."
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
+  }
+</script>
+
 </body>
 </html>
