@@ -470,12 +470,26 @@
       body.style.backgroundImage = "url('memebackgroundMobile.png')";
       icon.style.top = "55%"; // Lower icon for mobile
     } else {
-      body.style.backgroundImage = "url('memebackground.png')"
+      body.style.backgroundImage = "url('memebackground.png')";
       icon.style.top = "40%"; // Normal desktop icon position
+    }
+
+    // Real-time clock update
+    const timeContainer = document.querySelector('#time-options');
+    if (timeContainer) {
+      const now = new Date();
+      let hours = now.getHours();
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+
+      hours = hours % 12;
+      hours = hours ? hours : 12; // the hour '0' should be '12'
+
+      const formattedTime = `${hours}:${minutes} ${ampm}`;
+      timeContainer.setAttribute('data-time', formattedTime);
     }
   }
 
-  // Run on page load + when resized or rotated
   window.addEventListener('load', adjustForScreen);
   window.addEventListener('resize', adjustForScreen);
   window.addEventListener('orientationchange', adjustForScreen);
