@@ -99,8 +99,36 @@
         <label for="windows-trash-input" class="desktop-item">
             <div class="icon"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwBAMAAAClLOS0AAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAElBMVEUAAACAgIAAAADAwMD///8AgABI7wriAAAAAXRSTlMAQObYZgAAAAFiS0dEBI9o2VEAAAAHdElNRQfiBhoAMQTmjJHZAAABTElEQVQ4y3XU4Y2DMAwF4PQmqEn432MDyzAAlyxQiey/yvkZQkNCUZGq98WxCVWds4uInuS660HTQCTPNqdhUpgTP7Xusnz6Jc0Tk96nPHQ5UdA8sd6RC4S/XwrrCvAJWsDPyc8nUIqljRdJUYI3WGOI/mijIFrEaD6viaMXpgIo0hKWoDshwHY7aJHMgCSEdR9AEe/z6ld6VYBOmE18IsBDPpeOp6B5C+hkeQcaW34C51zE8sHtMIss7zt4R5Hsl9jCkiNKDLi0wIPkHKBjC0vOm0Y5dxWMjCsYXIFx0wIDuoKt/QbNY2DeAr7AqwGO9VB4wgOW0ML4DXizfQoMrgBK8An1UPbWedMBMEMLEsZMOLEO9HDtSKre5QdkR8wXoH1WvMYr/OzSg5tMlh4OkWaoWjoo0sMhTYtTrPfU/j+o8F0O4dsccp+rVPk/RsOIrdrb4ToAAAAldEVYdGRhdGU6Y3JlYXRlADIwMTgtMDYtMjZUMDA6NDk6MDQtMDQ6MDA484PuAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDE4LTA2LTI2VDAwOjQ5OjA0LTA0OjAwSa47UgAAAABJRU5ErkJggg==" alt="" /> </div>
             <div class="text">Recycle Bin</div>
+       
         </label>
         <a target="_blank" href="https://fjolt.com/article/css-windows-98" class="desktop-item"><span class="icon"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgBAMAAACBVGfHAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAHlBMVEUAAACAgID//7QAAADAwMD///8AgIAAAIAAgAAAAP+MXRRYAAAAAXRSTlMAQObYZgAAAAFiS0dEBfhv6ccAAAAHdElNRQfiBhoANyCM1dKOAAAAkUlEQVQoz2NgYBCEAQYoEFKCAEUDdAFhdAFHAzSBEGE0gVCoErBAWpKSorGxMVwgzT0jCUg5wwTU3Do62lAEIirTmpEFUl0yy8qMkAVcJdJmIgukhUh0TkcWSJzZkY4ioDYzo7wcxZaZM6YVIwsolVcWG6EIKBmD+MgCEIBTYCYETBpoFYQERFzgACJgjAQYGADW/1JJ50I4UgAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxOC0wNi0yNlQwMDo1NTozMi0wNDowMA4ejnkAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTgtMDYtMjZUMDA6NTU6MzItMDQ6MDB/QzbFAAAAAElFTkSuQmCC" alt="" /></span><span class="text">Read Article</span></a>
+    <label for="bagzzie-window" class="desktop-item">
+  <div class="icon">
+    <img src="https://github.com/RedPillPhil/CryptoRPG/blob/main/bagzzieIcon.png?raw=true" alt="Bagzzie Icon" style="width: 72px; height: 72px; image-rendering: pixelated;" />
+  </div>
+  <div class="text">Bagzzie</div>
+</label>
+
+<!-- Bagzzie Window Toggle -->
+<input type="checkbox" id="bagzzie-window" style="display: none;" />
+<div class="window bagzzie-window windows-box-shadow" id="bagzzie-container">
+  <div class="title-bar">
+    <span class="title-bar-text">Bagzzie - AI Chat</span>
+    <label for="bagzzie-window" class="title-bar-controls">
+      <button aria-label="Close"></button>
+    </label>
+  </div>
+  <div class="window-body">
+    <div id="chatbox" class="chat-window">
+      <div class="message bot">Hi! I'm Bagzzie, your degenerate AI assistant.</div>
+    </div>
+    <div class="chat-input">
+      <input type="text" id="userInput" placeholder="Say something..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+</div>
+    
     </div>
 <!-- This anchor tag will now appear centered in the entire screen -->
 <a href="https://bagholderz.com/game.html" 
