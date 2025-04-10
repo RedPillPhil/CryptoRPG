@@ -476,15 +476,24 @@
   function adjustForScreen() {
     const isMobile = window.innerHeight > window.innerWidth;
     const body = document.body;
-    const icon = document.getElementById('bag-icon');
+    const mainIcon = document.getElementById('bag-icon');
+    const bagzzieIcon = document.getElementById('bagzzie-icon');
 
     // Background switching
     if (isMobile) {
       body.style.backgroundImage = "url('memebackgroundMobile.png')";
-      icon.style.top = "55%"; // Lower icon for mobile
+      if (mainIcon) mainIcon.style.top = "55%";
+      if (bagzzieIcon) {
+        bagzzieIcon.style.top = "45%";
+        bagzzieIcon.style.right = "5%";
+      }
     } else {
       body.style.backgroundImage = "url('memebackground.png')";
-      icon.style.top = "40%"; // Normal desktop icon position
+      if (mainIcon) mainIcon.style.top = "40%";
+      if (bagzzieIcon) {
+        bagzzieIcon.style.top = "30%";
+        bagzzieIcon.style.right = "5%";
+      }
     }
 
     // Real-time clock update
@@ -507,6 +516,7 @@
   window.addEventListener('resize', adjustForScreen);
   window.addEventListener('orientationchange', adjustForScreen);
 </script>
+
 
 
 </body>
