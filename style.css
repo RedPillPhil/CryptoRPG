@@ -115,7 +115,7 @@ body {
     box-shadow: -2px -2px #818181, -2px 0 #818181, 0 -2px #818181, -4px -4px black, -4px 0 black, 0 -4px black, 2px 2px #e0dede, 0 2px #e0dede, 2px 0 #e0dede,  2px -2px #818181, -2px 2px #e0dede, -4px 2px black, -4px 4px white, 4px 4px white, 4px 0 white, 0 4px white, 2px -4px black, 4px -4px white;
 }
 #start-button {
-    min-width: 104px;
+    min-width: 154px;
     background-image: url('https://github.com/RedPillPhil/CryptoRPG/blob/main/degen_start_button.png?raw=true');
     width: 6.5rem;
     background-size: auto 80%;
@@ -123,6 +123,7 @@ body {
     background-position: 0.25rem;
     cursor: pointer;
     height: 2.25rem;
+
 }
 
 #time-options {
