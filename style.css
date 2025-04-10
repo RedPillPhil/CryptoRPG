@@ -11,6 +11,13 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+#bagzzie-icon {
+  position: absolute;
+  right: 5%; /* JS will update top value */
+  z-index: 10;
+}
+
+
 
 #start-bar {
     background: #c0c0c0;
