@@ -485,26 +485,25 @@
       if (mainIcon) mainIcon.style.top = "55%";
       if (bagzzieIcon) {
         bagzzieIcon.style.top = "45%";
+        bagzzieIcon.style.right = "5%";
       }
     } else {
       body.style.backgroundImage = "url('memebackground.png')";
       if (mainIcon) mainIcon.style.top = "40%";
       if (bagzzieIcon) {
-        bagzzieIcon.style.top = "30%";
+        bagzzieIcon.style.top = "30%"; // desktop position
+        bagzzieIcon.style.right = "5%";
       }
     }
 
-    // Real-time clock update
+    // Optional clock update
     const timeContainer = document.querySelector('#time-options');
     if (timeContainer) {
       const now = new Date();
       let hours = now.getHours();
       const minutes = now.getMinutes().toString().padStart(2, '0');
       const ampm = hours >= 12 ? 'PM' : 'AM';
-
-      hours = hours % 12;
-      hours = hours ? hours : 12; // the hour '0' should be '12'
-
+      hours = hours % 12 || 12;
       const formattedTime = `${hours}:${minutes} ${ampm}`;
       timeContainer.setAttribute('data-time', formattedTime);
     }
