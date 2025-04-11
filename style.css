@@ -12,6 +12,72 @@ body {
 }
 
 
+$windows-blue: #04008a;
+$windows-grey: #dadada;
+$windows-dark: #bdbdbd;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: monospace;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none; /* Webkit */
+  -moz-user-select: none;    /* Firefox */
+  -ms-user-select: none;     /* IE 10  */
+  /* Currently not supported in Opera but will be soon */
+  -o-user-select: none;
+  user-select: none; 
+}
+
+.winodws-popup {
+  position: fixed;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -10px);
+  box-shadow: inset 1px 1px 0 0 #fff, 1px 1px 0 0 #000, 2px 2px 5px 0 rgba(0,0,0,.31);
+  border-radius: 5px;
+  width: 450px;
+  background-color: $windows-grey;
+  overflow: hidden;
+  
+  &.disabled {
+    color: #666;
+    
+    .topbar {
+      color: #666;
+    }
+  }
+}
+
+.topbar {
+  padding: 6px 0;
+  text-align: center;
+  background-color: $windows-blue;
+  color: #FFF;
+  cursor: pointer;
+}
+
+.message {
+  padding: 25px 40px;
+}
+
+.flex-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+p + p {
+  margin-top: 20px;
+}
+
+button {
+  margin-right: 30px;
+  padding: 4px 8px;
+  box-shadow: inset 1px 1px 0 0 #ffffff, 1px 1px 0 0 #000000;
+}
+
 
 #start-bar {
     background: #c0c0c0;
