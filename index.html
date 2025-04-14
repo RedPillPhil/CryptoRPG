@@ -546,7 +546,6 @@
     const mainIcon = document.getElementById('bag-icon');
     const bagzzieIcon = document.getElementById('bagzzie-icon');
 
-    // Background switching
     if (isMobile) {
       body.style.backgroundImage = "url('memebackgroundMobile.png')";
       if (mainIcon) mainIcon.style.top = "55%";
@@ -558,12 +557,11 @@
       body.style.backgroundImage = "url('memebackground.png')";
       if (mainIcon) mainIcon.style.top = "40%";
       if (bagzzieIcon) {
-        bagzzieIcon.style.top = "20%"; // desktop position
+        bagzzieIcon.style.top = "20%";
         bagzzieIcon.style.right = "7%";
       }
     }
 
-    // Optional clock update
     const timeContainer = document.querySelector('#time-options');
     if (timeContainer) {
       const now = new Date();
@@ -579,6 +577,30 @@
   window.addEventListener('load', adjustForScreen);
   window.addEventListener('resize', adjustForScreen);
   window.addEventListener('orientationchange', adjustForScreen);
+
+  // === Shutdown Logic ===
+  document.addEventListener('DOMContentLoaded', function() {
+    const shutdownButton = document.getElementById('shutdown-button');
+    const container = document.getElementById('container');
+    const powerScreen = document.getElementById('power-screen');
+    const powerButton = document.getElementById('power');
+
+    if (shutdownButton) {
+      shutdownButton.addEventListener('click', function() {
+        container.classList.add('shutdown');
+        setTimeout(function() {
+          container.style.display = 'none';
+          powerScreen.style.display = 'flex';  // or block, depending on your design
+        }, 600);
+      });
+    }
+
+    if (powerButton) {
+      powerButton.addEventListener('click', function() {
+        location.reload();  // full page reset
+      });
+    }
+  });
 </script>
 
 
