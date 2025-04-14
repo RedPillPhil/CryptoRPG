@@ -1368,46 +1368,6 @@ textarea:focus {
     background-color: black;
     background-position: 50% 50%;
 }
-
-@keyframes shutdown {  
-  50% {
-    transform: scaleY(0.005);
-    background-color: white;
-  }
-  90% {
-    transform: scaleX(0.001) scaleY(0.005);
-    background-color: white;
-    opacity: 1;
-  }
-  100% {
-    transform: scaleX(0.001) scaleY(0.005);
-    background-color: white;
-    opacity: 0;
-  }
-}
-
-#power-screen {
-  position: fixed;
-  inset: 0;
-  background: black;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  visibility: hidden;
-  opacity: 0;
-  transition: opacity 0.5s;
-}
-
-#power {
-  cursor: pointer;
-  opacity: 0.2;
-}
-
-#power:hover {
-  opacity: 1;
-  transition: opacity 0.5s;
-}
-
 .tab-box {
     min-width: 30%;
 }
