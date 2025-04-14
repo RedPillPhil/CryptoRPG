@@ -1360,14 +1360,15 @@ textarea:focus {
     left: 0;
     width: 100%;
     height: 100%;
-background: black url('https://media1.tenor.com/m/Lk3ltlXzFFUAAAAd/the-matrix-has-you.gif')
-      background-size: 50% auto;
+    background-color: black;
+    background-image: url('https://media1.tenor.com/m/Lk3ltlXzFFUAAAAd/the-matrix-has-you.gif');
+    background-size: 50% auto;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
     cursor: pointer;
     z-index: 99999999999;
-    background-repeat: no-repeat;
-    background-color: black;
-    background-position: 50% 50%;
 }
+
 .tab-box {
     min-width: 30%;
 }
