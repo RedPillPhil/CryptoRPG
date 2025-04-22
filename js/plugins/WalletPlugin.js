@@ -23,80 +23,81 @@
   const WALLET_VAR = params['WalletVar'];
 
   const abi = [
-    'function balanceOf(address owner) view returns (uint256)',
-    'function decimals() view returns (uint8)'
+    "function balanceOf(address owner) view returns (uint256)",
+    "function decimals() view returns (uint8)"
   ];
 
   let cachedBalance = 'NaN BAGZ (Connect Wallet)';
   let lastCheck = 0;
 
-  // Override gold system
-  Game_Party.prototype.gold = function() {
-    return 0;
-  };
-
-  // Override the gold window drawing
-  Window_Gold.prototype.drawCurrencyValue = function(value, unit, x, y, width) {
-    const now = Date.now();
-    if (!window[WALLET_VAR] || !window[WALLET_VAR].startsWith('0x')) {
-      cachedBalance = 'NaN BAGZ (Connect Wallet)';
-    } else if (now - lastCheck > 10000) {
-      updateCryptoBalance();
+  // Connect Wallet Function
+  async function connectWallet() {
+    if (window.ethereum) {
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        window[WALLET_VAR] = accounts[0];
+        console.log("[Bagz] Wallet connected:", accounts[0]);
+        $gameParty.setName(accounts[0]); // Optional: sets party name to wallet
+        updateCryptoBalance();
+      } catch (err) {
+        console.error("[Bagz] MetaMask connection error:", err);
+      }
+    } else {
+      console.warn("[Bagz] MetaMask not detected.");
     }
-    this.resetTextColor();
-    this.drawText(cachedBalance, x, y, width, 'right');
-  };
+  }
 
-  // Function to get Bagz token balance
+  // Fetch Token Balance
   async function updateCryptoBalance() {
     try {
       const wallet = window[WALLET_VAR];
+      console.log("[Bagz] Wallet:", wallet);
+
       if (!wallet || !wallet.startsWith('0x')) {
         cachedBalance = 'NaN BAGZ (Connect Wallet)';
         return;
       }
 
       const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
+      console.log("[Bagz] Using RPC:", RPC_URL);
+
       const contract = new ethers.Contract(TOKEN_CONTRACT, abi, provider);
-      const [rawBalance, decimals] = await Promise.all([
-        contract.balanceOf(wallet),
-        contract.decimals()
-      ]);
+      console.log("[Bagz] Contract loaded:", TOKEN_CONTRACT);
+
+      const rawBalance = await contract.balanceOf(wallet);
+      const decimals = await contract.decimals();
+
+      console.log("[Bagz] Raw Balance:", rawBalance.toString());
+      console.log("[Bagz] Decimals:", decimals);
 
       const formatted = parseFloat(ethers.utils.formatUnits(rawBalance, decimals)).toFixed(2);
       cachedBalance = `${formatted} ${TOKEN_SYMBOL}`;
       lastCheck = Date.now();
+
+      console.log("[Bagz] Final:", cachedBalance);
     } catch (e) {
-      console.error('Error fetching BAGZ balance:', e);
+      console.error("[Bagz] Error fetching balance:", e);
       cachedBalance = 'Error';
     }
   }
 
-  // Expose connectWallet() to RPG Maker via script call
-  window.connectWallet = async function() {
-    try {
-      if (typeof window.ethereum === 'undefined') {
-        alert('MetaMask not found');
-        return;
-      }
-
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      const signer = provider.getSigner();
-      const address = await signer.getAddress();
-
-      window[WALLET_VAR] = address;
-      $gameActors.actor(1).setName(address); // Optional: sync with player name
-      await updateCryptoBalance();
-
-      // Safe UI refresh
-      if (SceneManager._scene && SceneManager._scene._goldWindow) {
-        SceneManager._scene._goldWindow.refresh();
-      }
-
-      console.log("Wallet connected:", address);
-    } catch (e) {
-      console.error("Failed to connect to MetaMask:", e);
-    }
+  // Patch Gold Window Display
+  const _Window_Gold_drawCurrencyValue = Window_Gold.prototype.drawCurrencyValue;
+  Window_Gold.prototype.drawCurrencyValue = function(value, unit, x, y, width) {
+    const text = cachedBalance || 'NaN BAGZ (Connect Wallet)';
+    this.resetTextColor();
+    this.drawText(text, x, y, width - this.textPadding(), 'right');
   };
+
+  // Hook into Scene Boot for auto-connection testing (optional)
+  const _Scene_Title_start = Scene_Title.prototype.start;
+  Scene_Title.prototype.start = function() {
+    _Scene_Title_start.call(this);
+    console.log("[Bagz] Starting Scene_Title... attempting wallet check.");
+    if (!window[WALLET_VAR]) connectWallet();
+  };
+
+  // Expose connectWallet for in-game use (like event command: Script → connectWallet(); )
+  window.connectWallet = connectWallet;
+
 })();
