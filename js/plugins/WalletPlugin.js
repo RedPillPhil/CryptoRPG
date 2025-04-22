@@ -1,5 +1,5 @@
 /*:
- * @plugindesc Replaces in-game gold with live Bagz token balance [v1.3] 🪙 + wallet connect + player name sync
+ * @plugindesc Replaces in-game gold with live Bagz token balance [v1.2] 🪙 + wallet connect + player name sync
  * @author GPT
  *
  * @param TokenContract
@@ -9,7 +9,7 @@
  * @default BAGZ
  *
  * @param RpcUrl
- * @default https://cloudflare-eth.com
+ * @default https://base.llamarpc.com
  *
  * @param WalletVar
  * @default connectedWallet
@@ -35,7 +35,7 @@
     return 0;
   };
 
-  // Override gold display in menu
+  // Override the gold window drawing
   Window_Gold.prototype.drawCurrencyValue = function(value, unit, x, y, width) {
     const now = Date.now();
     if (!window[WALLET_VAR] || !window[WALLET_VAR].startsWith('0x')) {
@@ -47,6 +47,7 @@
     this.drawText(cachedBalance, x, y, width, 'right');
   };
 
+  // Function to get Bagz token balance
   async function updateCryptoBalance() {
     try {
       const wallet = window[WALLET_VAR];
@@ -65,14 +66,13 @@
       const formatted = parseFloat(ethers.utils.formatUnits(rawBalance, decimals)).toFixed(2);
       cachedBalance = `${formatted} ${TOKEN_SYMBOL}`;
       lastCheck = Date.now();
-      console.log("Bagz balance updated:", cachedBalance);
     } catch (e) {
       console.error('Error fetching BAGZ balance:', e);
       cachedBalance = 'Error';
     }
   }
 
-  // Wallet connect function for in-game events
+  // Expose connectWallet() to RPG Maker via script call
   window.connectWallet = async function() {
     try {
       if (typeof window.ethereum === 'undefined') {
@@ -86,14 +86,12 @@
       const address = await signer.getAddress();
 
       window[WALLET_VAR] = address;
-      $gameActors.actor(1).setName(address); // Set wallet address as player name (optional)
-
+      $gameActors.actor(1).setName(address); // Optional: sync with player name
       await updateCryptoBalance();
 
-      // Refresh gold window if menu is active
-      const scene = SceneManager._scene;
-      if (scene && scene instanceof Scene_Menu && scene._goldWindow) {
-        scene._goldWindow.refresh();
+      // Safe UI refresh
+      if (SceneManager._scene && SceneManager._scene._goldWindow) {
+        SceneManager._scene._goldWindow.refresh();
       }
 
       console.log("Wallet connected:", address);
