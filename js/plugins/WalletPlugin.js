@@ -1,3 +1,10 @@
+<<<<<<< HEAD
+Window_Gold.prototype.drawCurrencyValue = function(value, unit, x, y, width) {
+  this.resetTextColor();
+  const balanceText = window.bagzBalance || 'NaN BAGZ (Connect)';
+  this.drawText(balanceText, x, y, width - this.textPadding(), 'right');
+};
+=======
 /*:
  * @plugindesc Replaces in-game gold with live Bagz token balance + wallet connect + debug logs [v1.3] 🪙
  * @author GPT
@@ -100,3 +107,4 @@
   window.updateCryptoBalance = updateCryptoBalance;
 
 })();
+>>>>>>> c5db6559c2319041034baca5f5af7f5f5eceb06f
