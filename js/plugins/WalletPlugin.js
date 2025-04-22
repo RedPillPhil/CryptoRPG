@@ -1,56 +1,74 @@
-(function waitForWindowMenuGold() {
-  if (typeof Window_MenuGold === "undefined") {
-    setTimeout(waitForWindowMenuGold, 50); // wait and try again
-    return;
-  }
+/*:
+ * @plugindesc Replaces in-game gold display with Bagz crypto token balance [v1.1] 🪙
+ * @author GPT
+ *
+ * @param TokenContract
+ * @default 0x666a0210FC8574D7Cc5Ae53717F947348289618c
+ *
+ * @param TokenSymbol
+ * @default BAGZ
+ *
+ * @param RpcUrl
+ * @default https://cloudflare-eth.com
+ *
+ * @param WalletVar
+ * @desc The global variable name that holds the connected wallet (e.g., window.connectedWallet)
+ * @default connectedWallet
+ */
 
-  // ⚙️ Your plugin logic starts here after it's safe to run
-  const parameters = PluginManager.parameters("MorphleTokenGoldPlugin");
+(function() {
+  const params = PluginManager.parameters('MorphleCryptoGold');
 
-  const TOKEN_CONTRACT = parameters["TokenContract"] || "0x666a0210FC8574D7Cc5Ae53717F947348289618c";
-  const TOKEN_SYMBOL = parameters["TokenSymbol"] || "$MORPHLE";
-  const RPC_URL = parameters["RpcUrl"] || "https://cloudflare-eth.com";
-  const WALLET_GLOBAL = parameters["WalletGlobalVar"] || "connectedWallet";
+  const TOKEN_CONTRACT = params['TokenContract'];
+  const TOKEN_SYMBOL = params['TokenSymbol'] || 'BAGZ';
+  const RPC_URL = params['RpcUrl'];
+  const WALLET_VAR = params['WalletVar'];
 
   const abi = [
-    "function balanceOf(address owner) view returns (uint256)",
-    "function decimals() view returns (uint8)"
+    'function balanceOf(address owner) view returns (uint256)',
+    'function decimals() view returns (uint8)'
   ];
 
-  const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
-  const contract = new ethers.Contract(TOKEN_CONTRACT, abi, provider);
+  let cachedBalance = 'NaN BAGZ (Connect Wallet)';
+  let lastCheck = 0;
 
-  let cachedBalance = null;
-  let lastFetchTime = 0;
-  const CACHE_DURATION = 10000;
-
-  async function fetchBalance() {
-    const wallet = window[WALLET_GLOBAL];
-    if (!wallet || !/^0x[a-fA-F0-9]{40}$/.test(wallet)) return "Connect Wallet";
-
+  async function updateCryptoBalance() {
     try {
-      const now = Date.now();
-      if (cachedBalance && now - lastFetchTime < CACHE_DURATION) return cachedBalance;
+      const wallet = window[WALLET_VAR];
+      if (!wallet || !wallet.startsWith('0x')) {
+        cachedBalance = 'NaN BAGZ (Connect Wallet)';
+        return;
+      }
 
-      const raw = await contract.balanceOf(wallet);
-      const dec = await contract.decimals();
-      const balance = parseFloat(ethers.utils.formatUnits(raw, dec)).toFixed(4);
+      const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
+      const contract = new ethers.Contract(TOKEN_CONTRACT, abi, provider);
+      const [rawBalance, decimals] = await Promise.all([
+        contract.balanceOf(wallet),
+        contract.decimals()
+      ]);
 
-      cachedBalance = `${balance} ${TOKEN_SYMBOL}`;
-      lastFetchTime = now;
-      return cachedBalance;
-    } catch (err) {
-      console.error("Failed to fetch token balance:", err);
-      return "Error";
+      const formatted = parseFloat(ethers.utils.formatUnits(rawBalance, decimals)).toFixed(2);
+      cachedBalance = `${formatted} ${TOKEN_SYMBOL}`;
+      lastCheck = Date.now();
+    } catch (e) {
+      console.error('Error fetching Bagz token balance:', e);
+      cachedBalance = 'Error';
     }
   }
 
-  const _Window_MenuGold_drawCurrencyValue = Window_MenuGold.prototype.drawCurrencyValue;
-  Window_MenuGold.prototype.drawCurrencyValue = function(value, unit, x, y, width) {
-    this.drawText("Loading...", x, y, width, "right");
-    fetchBalance().then(balanceText => {
-      this.contents.clear();
-      this.drawText(balanceText, x, y, width, "right");
-    });
+  Game_Party.prototype.gold = function() {
+    return 0; // Disable RPG Maker's default gold system
+  };
+
+  Window_Gold.prototype.drawCurrencyValue = function(value, unit, x, y, width) {
+    const now = Date.now();
+    if (!window[WALLET_VAR] || !window[WALLET_VAR].startsWith('0x')) {
+      cachedBalance = 'NaN BAGZ (Connect Wallet)';
+    } else if (now - lastCheck > 10000) {
+      updateCryptoBalance(); // Refresh every 10 sec
+    }
+
+    this.resetTextColor();
+    this.drawText(cachedBalance, x, y, width, 'right');
   };
 })();
