@@ -1,5 +1,5 @@
 /*:
- * @plugindesc Replaces in-game gold with live Bagz token balance [v1.2] 🪙 + wallet connect + player name sync
+ * @plugindesc Replaces in-game gold with live Bagz token balance + wallet connect + debug logs [v1.3] 🪙
  * @author GPT
  *
  * @param TokenContract
@@ -30,74 +30,73 @@
   let cachedBalance = 'NaN BAGZ (Connect Wallet)';
   let lastCheck = 0;
 
-  // Connect Wallet Function
   async function connectWallet() {
     if (window.ethereum) {
       try {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         window[WALLET_VAR] = accounts[0];
         console.log("[Bagz] Wallet connected:", accounts[0]);
-        $gameParty.setName(accounts[0]); // Optional: sets party name to wallet
+        $gameParty.setName(accounts[0]);
         updateCryptoBalance();
       } catch (err) {
-        console.error("[Bagz] MetaMask connection error:", err);
+        console.error("[Bagz] MetaMask error:", err);
       }
     } else {
       console.warn("[Bagz] MetaMask not detected.");
     }
   }
 
-  // Fetch Token Balance
   async function updateCryptoBalance() {
     try {
       const wallet = window[WALLET_VAR];
-      console.log("[Bagz] Wallet:", wallet);
+      console.log("[Bagz] Checking balance for wallet:", wallet);
 
       if (!wallet || !wallet.startsWith('0x')) {
         cachedBalance = 'NaN BAGZ (Connect Wallet)';
+        console.warn("[Bagz] No wallet connected.");
         return;
       }
 
       const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
-      console.log("[Bagz] Using RPC:", RPC_URL);
-
       const contract = new ethers.Contract(TOKEN_CONTRACT, abi, provider);
-      console.log("[Bagz] Contract loaded:", TOKEN_CONTRACT);
 
       const rawBalance = await contract.balanceOf(wallet);
       const decimals = await contract.decimals();
-
-      console.log("[Bagz] Raw Balance:", rawBalance.toString());
-      console.log("[Bagz] Decimals:", decimals);
 
       const formatted = parseFloat(ethers.utils.formatUnits(rawBalance, decimals)).toFixed(2);
       cachedBalance = `${formatted} ${TOKEN_SYMBOL}`;
       lastCheck = Date.now();
 
-      console.log("[Bagz] Final:", cachedBalance);
+      console.log("[Bagz] New token balance:", cachedBalance);
     } catch (e) {
-      console.error("[Bagz] Error fetching balance:", e);
+      console.error("[Bagz] Failed to fetch token balance:", e);
       cachedBalance = 'Error';
     }
   }
 
-  // Patch Gold Window Display
-  const _Window_Gold_drawCurrencyValue = Window_Gold.prototype.drawCurrencyValue;
+  // Override gold display
   Window_Gold.prototype.drawCurrencyValue = function(value, unit, x, y, width) {
-    const text = cachedBalance || 'NaN BAGZ (Connect Wallet)';
     this.resetTextColor();
-    this.drawText(text, x, y, width - this.textPadding(), 'right');
+    this.drawText(cachedBalance, x, y, width - this.textPadding(), 'right');
   };
 
-  // Hook into Scene Boot for auto-connection testing (optional)
+  // Periodic update
+  setInterval(() => {
+    if (window[WALLET_VAR]) {
+      updateCryptoBalance();
+    }
+  }, 10000); // every 10 sec
+
+  // Hook: Auto-connect on start
   const _Scene_Title_start = Scene_Title.prototype.start;
   Scene_Title.prototype.start = function() {
     _Scene_Title_start.call(this);
-    console.log("[Bagz] Starting Scene_Title... attempting wallet check.");
+    console.log("[Bagz] Scene_Title started.");
     if (!window[WALLET_VAR]) connectWallet();
   };
 
-  // Expose connectWallet for in-game use (like event command: Script → connectWallet(); )
+  // Dev Debugging Shortcut
   window.connectWallet = connectWallet;
+  window.updateCryptoBalance = updateCryptoBalance;
 
 })();
