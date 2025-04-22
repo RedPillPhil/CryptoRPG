@@ -28,7 +28,6 @@
   ];
 
   let cachedBalance = 'NaN BAGZ (Connect Wallet)';
-  let lastCheck = 0;
 
   async function connectWallet() {
     if (window.ethereum) {
@@ -59,20 +58,45 @@
 
       const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
       const contract = new ethers.Contract(TOKEN_CONTRACT, abi, provider);
-
       const rawBalance = await contract.balanceOf(wallet);
       const decimals = await contract.decimals();
 
       const formatted = parseFloat(ethers.utils.formatUnits(rawBalance, decimals)).toFixed(2);
       cachedBalance = `${formatted} ${TOKEN_SYMBOL}`;
-      lastCheck = Date.now();
-
       console.log("[Bagz] New token balance:", cachedBalance);
     } catch (e) {
       console.error("[Bagz] Failed to fetch token balance:", e);
       cachedBalance = 'Error';
     }
+
+    // Refresh UI
+    if (SceneManager._scene && SceneManager._scene._goldWindow) {
+      SceneManager._scene._goldWindow.refresh();
+    }
   }
 
-  // Override gold display
-  Window_Gold.prototype.drawCurrencyValue = function(value, unit, x_
+  // Replace gold display with Bagz balance
+  Window_Gold.prototype.drawCurrencyValue = function(value, unit, x, y, width) {
+    this.resetTextColor();
+    this.drawText(cachedBalance, x, y, width - this.textPadding(), 'right');
+  };
+
+  // Try to reconnect automatically on title screen
+  const _Scene_Title_start = Scene_Title.prototype.start;
+  Scene_Title.prototype.start = function() {
+    _Scene_Title_start.call(this);
+    console.log("[Bagz] Scene_Title started.");
+    if (!window[WALLET_VAR]) connectWallet();
+  };
+
+  // Refresh token balance every 10 seconds
+  setInterval(() => {
+    if (window[WALLET_VAR]) {
+      updateCryptoBalance();
+    }
+  }, 10000);
+
+  // Expose to console for testing
+  window.connectWallet = connectWallet;
+  window.updateCryptoBalance = updateCryptoBalance;
+})();
