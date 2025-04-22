@@ -1,10 +1,3 @@
-<<<<<<< HEAD
-Window_Gold.prototype.drawCurrencyValue = function(value, unit, x, y, width) {
-  this.resetTextColor();
-  const balanceText = window.bagzBalance || 'NaN BAGZ (Connect)';
-  this.drawText(balanceText, x, y, width - this.textPadding(), 'right');
-};
-=======
 /*:
  * @plugindesc Replaces in-game gold with live Bagz token balance + wallet connect + debug logs [v1.3] 🪙
  * @author GPT
@@ -82,29 +75,4 @@ Window_Gold.prototype.drawCurrencyValue = function(value, unit, x, y, width) {
   }
 
   // Override gold display
-  Window_Gold.prototype.drawCurrencyValue = function(value, unit, x, y, width) {
-    this.resetTextColor();
-    this.drawText(cachedBalance, x, y, width - this.textPadding(), 'right');
-  };
-
-  // Periodic update
-  setInterval(() => {
-    if (window[WALLET_VAR]) {
-      updateCryptoBalance();
-    }
-  }, 10000); // every 10 sec
-
-  // Hook: Auto-connect on start
-  const _Scene_Title_start = Scene_Title.prototype.start;
-  Scene_Title.prototype.start = function() {
-    _Scene_Title_start.call(this);
-    console.log("[Bagz] Scene_Title started.");
-    if (!window[WALLET_VAR]) connectWallet();
-  };
-
-  // Dev Debugging Shortcut
-  window.connectWallet = connectWallet;
-  window.updateCryptoBalance = updateCryptoBalance;
-
-})();
-
+  Window_Gold.prototype.drawCurrencyValue = function(value, unit, x_
