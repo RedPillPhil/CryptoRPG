@@ -107,4 +107,4 @@ Window_Gold.prototype.drawCurrencyValue = function(value, unit, x, y, width) {
   window.updateCryptoBalance = updateCryptoBalance;
 
 })();
->>>>>>> c5db6559c2319041034baca5f5af7f5f5eceb06f
+
