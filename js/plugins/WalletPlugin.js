@@ -1,5 +1,5 @@
 /*:
- * @plugindesc Replaces in-game gold with live Bagz token balance + wallet connect + debug logs [v1.3] 🪙
+ * @plugindesc Replaces in-game gold with live Bagz token balance [v1.2] 🪙 + wallet connect + player name sync
  * @author GPT
  *
  * @param TokenContract
@@ -9,7 +9,7 @@
  * @default BAGZ
  *
  * @param RpcUrl
- * @default https://base.llamarpc.com
+ * @default https://cloudflare-eth.com
  *
  * @param WalletVar
  * @default connectedWallet
@@ -23,80 +23,80 @@
   const WALLET_VAR = params['WalletVar'];
 
   const abi = [
-    "function balanceOf(address owner) view returns (uint256)",
-    "function decimals() view returns (uint8)"
+    'function balanceOf(address owner) view returns (uint256)',
+    'function decimals() view returns (uint8)'
   ];
 
   let cachedBalance = 'NaN BAGZ (Connect Wallet)';
+  let lastCheck = 0;
 
-  async function connectWallet() {
-    if (window.ethereum) {
-      try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        window[WALLET_VAR] = accounts[0];
-        console.log("[Bagz] Wallet connected:", accounts[0]);
-        $gameParty.setName(accounts[0]);
-        updateCryptoBalance();
-      } catch (err) {
-        console.error("[Bagz] MetaMask error:", err);
-      }
-    } else {
-      console.warn("[Bagz] MetaMask not detected.");
+  // Override gold system
+  Game_Party.prototype.gold = function() {
+    return 0;
+  };
+
+  // Override the gold window drawing
+  Window_Gold.prototype.drawCurrencyValue = function(value, unit, x, y, width) {
+    const now = Date.now();
+    if (!window[WALLET_VAR] || !window[WALLET_VAR].startsWith('0x')) {
+      cachedBalance = 'NaN BAGZ (Connect Wallet)';
+    } else if (now - lastCheck > 10000) {
+      updateCryptoBalance();
     }
-  }
+    this.resetTextColor();
+    this.drawText(cachedBalance, x, y, width, 'right');
+  };
 
+  // Function to get Bagz token balance
   async function updateCryptoBalance() {
     try {
       const wallet = window[WALLET_VAR];
-      console.log("[Bagz] Checking balance for wallet:", wallet);
-
       if (!wallet || !wallet.startsWith('0x')) {
         cachedBalance = 'NaN BAGZ (Connect Wallet)';
-        console.warn("[Bagz] No wallet connected.");
         return;
       }
 
       const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
       const contract = new ethers.Contract(TOKEN_CONTRACT, abi, provider);
-      const rawBalance = await contract.balanceOf(wallet);
-      const decimals = await contract.decimals();
+      const [rawBalance, decimals] = await Promise.all([
+        contract.balanceOf(wallet),
+        contract.decimals()
+      ]);
 
       const formatted = parseFloat(ethers.utils.formatUnits(rawBalance, decimals)).toFixed(2);
       cachedBalance = `${formatted} ${TOKEN_SYMBOL}`;
-      console.log("[Bagz] New token balance:", cachedBalance);
+      lastCheck = Date.now();
     } catch (e) {
-      console.error("[Bagz] Failed to fetch token balance:", e);
+      console.error('Error fetching BAGZ balance:', e);
       cachedBalance = 'Error';
-    }
-
-    // Refresh UI
-    if (SceneManager._scene && SceneManager._scene._goldWindow) {
-      SceneManager._scene._goldWindow.refresh();
     }
   }
 
-  // Replace gold display with Bagz balance
-  Window_Gold.prototype.drawCurrencyValue = function(value, unit, x, y, width) {
-    this.resetTextColor();
-    this.drawText(cachedBalance, x, y, width - this.textPadding(), 'right');
-  };
+  // Expose connectWallet() to RPG Maker via script call
+  window.connectWallet = async function() {
+    try {
+      if (typeof window.ethereum === 'undefined') {
+        alert('MetaMask not found');
+        return;
+      }
 
-  // Try to reconnect automatically on title screen
-  const _Scene_Title_start = Scene_Title.prototype.start;
-  Scene_Title.prototype.start = function() {
-    _Scene_Title_start.call(this);
-    console.log("[Bagz] Scene_Title started.");
-    if (!window[WALLET_VAR]) connectWallet();
-  };
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      const signer = provider.getSigner();
+      const address = await signer.getAddress();
 
-  // Refresh token balance every 10 seconds
-  setInterval(() => {
-    if (window[WALLET_VAR]) {
-      updateCryptoBalance();
+      window[WALLET_VAR] = address;
+      $gameActors.actor(1).setName(address); // Optional: sync with player name
+      await updateCryptoBalance();
+
+      // Safe UI refresh
+      if (SceneManager._scene && SceneManager._scene._goldWindow) {
+        SceneManager._scene._goldWindow.refresh();
+      }
+
+      console.log("Wallet connected:", address);
+    } catch (e) {
+      console.error("Failed to connect to MetaMask:", e);
     }
-  }, 10000);
-
-  // Expose to console for testing
-  window.connectWallet = connectWallet;
-  window.updateCryptoBalance = updateCryptoBalance;
+  };
 })();
