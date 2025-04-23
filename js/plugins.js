@@ -26,5 +26,9 @@ var $plugins =
 {"name":"Browserfix","status":true,"description":"Cyberpunk Secure Terminal - Use in Events with PIN-based Access Control","parameters":{}},
 {"name":"SecureTerminalEvent_v2","status":false,"description":"Cyberpunk Secure Terminal - Use in Events with PIN-based Access Control","parameters":{}},
 {"name":"SecureTerminalEvent_v2","status":true,"description":"Secure Terminal Scene - Triggerable via event for PIN-based access (Cyberpunk style)","parameters":{}},
-{"name":"CustomMenu","status":true,"description":"Secure Terminal Title Screen - Cyberpunk Style PIN Login to Start Game","parameters":{}}
+{"name":"CustomMenu","status":true,"description":"Secure Terminal Title Screen - Cyberpunk Style PIN Login to Start Game","parameters":{}},
+{"name":"CharacterCreatorMZ","status":true,"description":"In-Game Character Creator for RPG Maker MZ — Inspired by CharacterCreatorEX, but MZ native and browser safe.","parameters":{}},
+{"name":"MPP_CharacterMake","status":false,"description":"キャラクター生成用パーツを使ってキャラクターを作ることができるようになります。","parameters":{"Base Kinds":"[\"Male\", \"Female\", \"Kid\"]"}},
+{"name":"DynamicActorFace","status":true,"description":"Character Creator EX - Full Conversion for RPG Maker MZ (Standalone) | Original by SRD, Port by ChatGPT","parameters":{}},
+{"name":"WalletPlugin","status":true,"description":"Replaces RPG Maker gold display with a live Morphle token balance pulled from the blockchain using ethers.js","parameters":{"TokenContract":"0x666a0210FC8574D7Cc5Ae53717F947348289618c","TokenSymbol":"$MORPHLE","RpcUrl":"https://cloudflare-eth.com","WalletGlobalVar":"connectedWallet"}}
 ];
