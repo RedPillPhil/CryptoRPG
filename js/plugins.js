@@ -32,5 +32,6 @@ var $plugins =
 {"name":"DynamicActorFace","status":false,"description":"Character Creator EX - Full Conversion for RPG Maker MZ (Standalone) | Original by SRD, Port by ChatGPT","parameters":{}},
 {"name":"WalletConnect","status":false,"description":"Connects to MetaMask, sets wallet address as player name, and syncs token balance with gold. [Bagz]","parameters":{}},
 {"name":"AlgoCryptoPayment","status":false,"description":"Algo Cryptocurrency payment gateway","parameters":{"BlockchainRPC":"https://bsc-dataseed.binance.org/","GameOwner":"0x7B70921a415eF9cCea9EFAA19EAB8E9860734c2f","PlayerSendCryptoAmount":"0.001","PlayerGetGameGolds":"10000","StorePrivateVariableID":"5"}},
-{"name":"RS_InputDialog","status":false,"description":"This plugin allows you to display Text Edit Box on the screen. <RS_InputDialog>","parameters":{"textBox Width":"488","textBox Height":"36","variable ID":"3","debug":"false","Text Hint":"Please enter the value...","direction":"ltr","Max Length":"255","Style":"","CSS":"\"\"","Button Name":"","Ok":"OK","Cancel":"Cancel","Position":"center"}}
+{"name":"RS_InputDialog","status":false,"description":"This plugin allows you to display Text Edit Box on the screen. <RS_InputDialog>","parameters":{"textBox Width":"488","textBox Height":"36","variable ID":"3","debug":"false","Text Hint":"Please enter the value...","direction":"ltr","Max Length":"255","Style":"","CSS":"\"\"","Button Name":"","Ok":"OK","Cancel":"Cancel","Position":"center"}},
+{"name":"ethers.umd.min","status":true,"description":"","parameters":{}}
 ];
