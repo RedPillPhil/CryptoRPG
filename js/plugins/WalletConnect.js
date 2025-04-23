@@ -1,18 +1,45 @@
 /*:
  * @target MZ
- * @plugindesc Connects to MetaMask wallet and fetches token balance from Basechain [Bagz]
+ * @plugindesc Connects to MetaMask and fetches wallet address and token balance to replace in-game gold.
+ * @author Bagz
+ *
  * @command ConnectWallet
  * @text Connect Wallet
- * @desc Connects to MetaMask and updates player name and gold based on token balance
+ * @desc Connect to MetaMask and set player name and token balance.
  */
 
 (() => {
-    const pluginName = 'Bagz_WalletConnect';
+    PluginManager.registerCommand("Bagz_WalletConnect", "ConnectWallet", async function () {
+        if (typeof ethers === 'undefined') {
+            console.warn("[Bagz] Ethers.js is not loaded.");
+            return;
+        }
+
+        if (typeof window.ethereum === 'undefined') {
+            console.warn("[Bagz] MetaMask is not installed.");
+            return;
+        }
+
+        try {
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            const connectedAddress = accounts[0];
+            console.log('[Bagz] Connected to MetaMask:', connectedAddress);
+
+            displayConnectedAddress(connectedAddress);
+            setPlayerNameToWalletAddress(connectedAddress);
+
+            const tokenBalance = await fetchTokenBalance(connectedAddress);
+            replaceGoldAmount(tokenBalance);
+
+        } catch (error) {
+            console.error('[Bagz] Failed to connect to MetaMask:', error);
+        }
+    });
 
     function formatWalletAddress(address) {
-        const first = address.slice(0, 5);
-        const last = address.slice(-5);
-        return `${first}...${last}`;
+        const firstPart = address.slice(0, 5);
+        const lastPart = address.slice(-5);
+        return `${firstPart}...${lastPart}`;
     }
 
     function displayConnectedAddress(address) {
@@ -28,16 +55,14 @@
 
         if (SceneManager._scene && SceneManager._scene._statusWindow) {
             SceneManager._scene._statusWindow.refresh();
+            console.log('[Bagz] Refreshed status window');
+        } else {
+            console.warn('[Bagz] Status window not available, skipping refresh');
         }
     }
 
     async function fetchTokenBalance(address) {
         console.log('[Bagz] Fetching token balance for:', address);
-        if (typeof ethers === 'undefined') {
-            console.error('[Bagz] ethers is not loaded');
-            return '0';
-        }
-
         const provider = new ethers.providers.JsonRpcProvider('https://base.llamarpc.com');
         const tokenContract = new ethers.Contract(
             '0x666a0210FC8574D7Cc5Ae53717F947348289618c',
@@ -49,50 +74,27 @@
         );
 
         try {
-            const raw = await tokenContract.balanceOf(address);
+            const rawBalance = await tokenContract.balanceOf(address);
             const decimals = await tokenContract.decimals();
-            return parseFloat(ethers.utils.formatUnits(raw, decimals)).toFixed(2);
+            const formatted = parseFloat(ethers.utils.formatUnits(rawBalance, decimals)).toFixed(2);
+            console.log('[Bagz] Token balance:', formatted);
+            return formatted;
         } catch (error) {
             console.error('[Bagz] Error fetching token balance:', error);
             return '0';
         }
     }
 
-    function replaceGoldAmount(balance) {
-        const gold = parseInt(parseFloat(balance) * 100);
+    function replaceGoldAmount(tokenBalance) {
+        const gold = Math.floor(parseFloat(tokenBalance) * 100);
         $gameParty._gold = gold;
+        console.log('[Bagz] Replacing gold with token balance:', gold);
+
         if (SceneManager._scene && SceneManager._scene._goldWindow) {
             SceneManager._scene._goldWindow.refresh();
+            console.log('[Bagz] Gold window refreshed');
+        } else {
+            console.warn('[Bagz] Gold window not found, skipping refresh');
         }
     }
-
-    async function connectWallet() {
-        if (typeof window.ethereum === 'undefined') {
-            console.warn('[Bagz] MetaMask not detected');
-            return;
-        }
-
-        try {
-            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            const address = accounts[0];
-
-            displayConnectedAddress(address);
-            setPlayerNameToWalletAddress(address);
-
-            const balance = await fetchTokenBalance(address);
-            replaceGoldAmount(balance);
-        } catch (e) {
-            console.error('[Bagz] Failed to connect wallet:', e);
-        }
-    }
-
-    PluginManager.registerCommand(pluginName, 'ConnectWallet', () => {
-        connectWallet();
-    });
-
-    // Auto-load ethers.js
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js';
-    script.onload = () => console.log('[Bagz] Ethers.js loaded ✅');
-    document.head.appendChild(script);
 })();
