@@ -29,5 +29,6 @@ var $plugins =
 {"name":"CustomMenu","status":true,"description":"Secure Terminal Title Screen - Cyberpunk Style PIN Login to Start Game","parameters":{}},
 {"name":"CharacterCreatorMZ","status":false,"description":"In-Game Character Creator for RPG Maker MZ — Inspired by CharacterCreatorEX, but MZ native and browser safe.","parameters":{}},
 {"name":"MPP_CharacterMake","status":false,"description":"キャラクター生成用パーツを使ってキャラクターを作ることができるようになります。","parameters":{"Base Kinds":"[\"Male\", \"Female\", \"Kid\"]"}},
-{"name":"DynamicActorFace","status":false,"description":"Character Creator EX - Full Conversion for RPG Maker MZ (Standalone) | Original by SRD, Port by ChatGPT","parameters":{}}
+{"name":"DynamicActorFace","status":false,"description":"Character Creator EX - Full Conversion for RPG Maker MZ (Standalone) | Original by SRD, Port by ChatGPT","parameters":{}},
+{"name":"WalletConnect","status":true,"description":"Connects to MetaMask wallet and fetches token balance from Basechain [Bagz]","parameters":{}}
 ];
