@@ -1427,7 +1427,6 @@ textarea:focus {
 .tab-box-content #topic-3:checked ~ .content .topic-3-content,
 .tab-box-content #topic-4:checked ~ .content .topic-4-content,
 .tab-box-content #topic-5:checked ~ .content .topic-5-content,
-.tab-box-content #topic-6:checked ~ .content .topic-6-content,
 .tab-box-content #topic-7:checked ~ .content .topic-7-content {
     display: block;
 }
@@ -1438,7 +1437,6 @@ textarea:focus {
 .tab-box-content #topic-3:checked ~ .tab-box ul label[for="topic-3"],
 .tab-box-content #topic-4:checked ~ .tab-box ul label[for="topic-4"],
 .tab-box-content #topic-5:checked ~ .tab-box ul label[for="topic-5"],
-.tab-box-content #topic-6:checked ~ .tab-box ul label[for="topic-6"],
 .tab-box-content #topic-7:checked ~ .tab-box ul label[for="topic-7"] {
     background: #000a7c;
     color: white;
