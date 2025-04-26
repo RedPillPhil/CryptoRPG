@@ -1421,6 +1421,7 @@ textarea:focus {
 .tab-box-content .content > div {
     display: none;
 }
+.tab-box-content #topic-0:checked ~ .content .topic-0-content,
 .tab-box-content #topic-1:checked ~ .content .topic-1-content,
 .tab-box-content #topic-2:checked ~ .content .topic-2-content,
 .tab-box-content #topic-3:checked ~ .content .topic-3-content,
@@ -1431,6 +1432,7 @@ textarea:focus {
     display: block;
 }
 
+.tab-box-content #topic-0:checked ~ .tab-box ul label[for="topic-0"]
 .tab-box-content #topic-1:checked ~ .tab-box ul label[for="topic-1"],
 .tab-box-content #topic-2:checked ~ .tab-box ul label[for="topic-2"],
 .tab-box-content #topic-3:checked ~ .tab-box ul label[for="topic-3"],
