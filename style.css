@@ -1432,7 +1432,7 @@ textarea:focus {
     display: block;
 }
 
-.tab-box-content #topic-0:checked ~ .tab-box ul label[for="topic-0"]
+.tab-box-content #topic-0:checked ~ .tab-box ul label[for="topic-0"],
 .tab-box-content #topic-1:checked ~ .tab-box ul label[for="topic-1"],
 .tab-box-content #topic-2:checked ~ .tab-box ul label[for="topic-2"],
 .tab-box-content #topic-3:checked ~ .tab-box ul label[for="topic-3"],
