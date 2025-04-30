@@ -1,118 +1,131 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
   <meta charset="UTF-8">
   <title>Bloom</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
-  <link rel="stylesheet" href="./style.css">
-  <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+  <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Montserrat'><link rel="stylesheet" href="./style.css">
+
 </head>
 <body>
-
+<!-- partial:index.partial.html -->
 <svg id="svg"></svg>
 
 <header>
   <h1>Bloom</h1>
   <a>Portal</a><br>
-  <a>About</a>
-  <a>Tokenomics</a>
-  <a>Swap</a>
+ <a>About</a><a>Tokenomics</a><a>Swap</a>
 </header>
-
-<nav class="elementor-widget-container">
-  <ul id="menu-primary" class="lqd-menu-ul flex items-center list-none">
-    <li><span id="price">Price: Loading...</span></li>
-    <li><span id="upcomingRebasePercentage">Rebase: Loading...</span></li>
-    <li><span id="basePercent">Burn: Loading...</span></li>
-    <li><span id="totalSupply2">Supply: Loading...</span></li>
-    <li><span id="marketCap2">Market Cap: Loading...</span></li>
-    <li><span id="countdown2">Next Bloom: (connect web3)</span></li>
-    <li><span>0x8cccbb96e0f8d491c611dd2Ab5f45753728A167a</span></li>
-  </ul>
-</nav>
-
 <footer>
-  Click/Tap anywhere when it's time to bloom to call the bloom function
+  Click/Tap anywhere when its time to bloom to call the bloom function
 </footer>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.0.3/chroma.min.js"></script>
-<script>
-  const bloomAddress = "0x4A67A65c2fdB0397fa41eFC3896b0eCD4c2d006E";
-  const baseRpc = "https://mainnet.base.org";
-  const web3 = new Web3(baseRpc);
-
-  const bloomAbi = [
-    { constant: true, inputs: [], name: "totalSupply", outputs: [{ name: "", type: "uint256" }], type: "function" },
-    { constant: true, inputs: [], name: "getPrice", outputs: [{ name: "", type: "uint256" }], type: "function" },
-    { constant: true, inputs: [], name: "rebasePercent", outputs: [{ name: "", type: "uint256" }], type: "function" },
-    { constant: true, inputs: [], name: "burnPercent", outputs: [{ name: "", type: "uint256" }], type: "function" },
-    { constant: true, inputs: [], name: "nextRebaseTime", outputs: [{ name: "", type: "uint256" }], type: "function" }
-  ];
-
-  const bloom = new web3.eth.Contract(bloomAbi, bloomAddress);
-
-  async function fetchBloomStats() {
-    try {
-      const [price, supply, rebase, burn, nextRebase] = await Promise.all([
-        bloom.methods.getPrice().call(),
-        bloom.methods.totalSupply().call(),
-        bloom.methods.rebasePercent().call(),
-        bloom.methods.burnPercent().call(),
-        bloom.methods.nextRebaseTime().call()
-      ]);
-
-      const decimals = 18;
-      const readablePrice = (price / (10 ** decimals)).toFixed(6);
-      const readableSupply = (supply / (10 ** decimals)).toLocaleString();
-      const marketCap = (price * supply / (10 ** (2 * decimals))).toFixed(2);
-
-      document.getElementById("price").textContent = `Price: $${readablePrice}`;
-      document.getElementById("totalSupply2").textContent = `Supply: ${readableSupply}`;
-      document.getElementById("marketCap2").textContent = `Market Cap: $${marketCap}`;
-      document.getElementById("upcomingRebasePercentage").textContent = `Rebase: ${rebase / 100}%`;
-      document.getElementById("basePercent").textContent = `Burn: ${burn / 100}%`;
-
-      updateCountdown(nextRebase);
-    } catch (error) {
-      console.error("Failed to fetch data:", error);
-    }
-  }
-
-  function updateCountdown(nextRebaseTime) {
-    const countdownEl = document.getElementById("countdown2");
-    const interval = setInterval(() => {
-      const now = Math.floor(Date.now() / 1000);
-      const seconds = nextRebaseTime - now;
-      if (seconds <= 0) {
-        countdownEl.textContent = "Rebasing...";
-        clearInterval(interval);
-        fetchBloomStats();
-      } else {
-        const h = Math.floor(seconds / 3600);
-        const m = Math.floor((seconds % 3600) / 60);
-        const s = seconds % 60;
-        countdownEl.textContent = `Next Bloom: ${h}h ${m}m ${s}s`;
-      }
-    }, 1000);
-  }
-
-  async function connectWallet() {
-    if (typeof window.ethereum !== "undefined") {
-      try {
-        await window.ethereum.request({ method: "eth_requestAccounts" });
-        const web3Wallet = new Web3(window.ethereum);
-        const accounts = await web3Wallet.eth.getAccounts();
-        alert(`Connected: ${accounts[0]}`);
-      } catch (err) {
-        console.error("User denied wallet connection", err);
-      }
-    } else {
-      alert("Please install MetaMask or another Web3 wallet.");
-    }
-  }
-
-  fetchBloomStats();
-</script>
+<!-- partial -->
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.0.3/chroma.min.js'></script><script  src="./script.js"></script>
 
 </body>
 </html>
+
+    <nav class="elementor-element elementor-element-2f48ab85 elementor-widget elementor-widget-lqd-menu lqd-widget-container-flex lqd-widget-container-items-start" data-id="2f48ab85" data-element_type="widget" data-widget_type="lqd-menu.default" data-lqd-menu-dropdown-position-applied="false" style="position: centered; top: 0; left: 0;">
+        <div class="elementor-widget-container">
+            <!-- Static information about Bloom -->
+            <ul id="menu-primary" class="lqd-menu-ul lqd-menu-ul-top flex items-center grow list-none transition-colors">
+                <li class="menu-item menu-item-type-custom menu-item-object-custom lqd-menu-li relative lqd-menu-li-top">
+                    <span class="lqd-menu-link transition-all lqd-menu-link-top flex items-center" id="price">Price: Loading...</span>
+                </li>
+                <li class="menu-item menu-item-type-custom menu-item-object-custom lqd-menu-li relative lqd-menu-li-top">
+                    <span class="lqd-menu-link transition-all lqd-menu-link-top flex items-center" id="upcomingRebasePercentage">Rebase: Loading...</span>
+                </li>
+                <li class="menu-item menu-item-type-custom menu-item-object-custom lqd-menu-li relative lqd-menu-li-top">
+                    <span class="lqd-menu-link transition-all lqd-menu-link-top flex items-center" id="basePercent">Burn: Loading...</span>
+                </li>
+                 <li class="menu-item menu-item-type-custom menu-item-object-custom lqd-menu-li relative lqd-menu-li-top">
+                    <span class="lqd-menu-link transition-all lqd-menu-link-top flex items-center" id="totalSupply2">Supply: Loading... </span>
+                </li>
+                  <li class="menu-item menu-item-type-custom menu-item-object-custom lqd-menu-li relative lqd-menu-li-top">
+                    <span class="lqd-menu-link transition-all lqd-menu-link-top flex items-center" id="marketCap2">Market Cap: Loading... </span>
+                </li>
+                     <li class="menu-item menu-item-type-custom menu-item-object-custom lqd-menu-li relative lqd-menu-li-top">
+                    <span class="lqd-menu-link transition-all lqd-menu-link-top flex items-center" id="countdown2">Next Bloom: (connect web3) </span>
+ <li class="menu-item menu-item-type-custom menu-item-object-custom lqd-menu-li relative lqd-menu-li-top"
+<span class="lqd-menu-link transition-all lqd-menu-link-top flex items-center" id="countdown2">0x8cccbb96e0f8d491c611dd2Ab5f45753728A167a</span>
+                </li>
+            </ul>
+        </div>
+    </nav>
+ <script>
+    const bloomAddress = "0x4A67A65c2fdB0397fa41eFC3896b0eCD4c2d006E";
+    const baseRpc = "https://mainnet.base.org"; // BASE Mainnet RPC
+    const web3 = new Web3(baseRpc);
+
+    // Basic ERC20 + rebase interface (add any custom view functions as needed)
+    const bloomAbi = [
+      { "constant": true, "inputs": [], "name": "totalSupply", "outputs": [{"name": "", "type": "uint256"}], "type": "function" },
+      { "constant": true, "inputs": [], "name": "getPrice", "outputs": [{"name": "", "type": "uint256"}], "type": "function" },
+      { "constant": true, "inputs": [], "name": "rebasePercent", "outputs": [{"name": "", "type": "uint256"}], "type": "function" },
+      { "constant": true, "inputs": [], "name": "burnPercent", "outputs": [{"name": "", "type": "uint256"}], "type": "function" },
+      { "constant": true, "inputs": [], "name": "nextRebaseTime", "outputs": [{"name": "", "type": "uint256"}], "type": "function" }
+    ];
+
+    const bloom = new web3.eth.Contract(bloomAbi, bloomAddress);
+
+    async function fetchBloomStats() {
+      try {
+        const [price, supply, rebase, burn, nextRebase] = await Promise.all([
+          bloom.methods.getPrice().call(),
+          bloom.methods.totalSupply().call(),
+          bloom.methods.rebasePercent().call(),
+          bloom.methods.burnPercent().call(),
+          bloom.methods.nextRebaseTime().call()
+        ]);
+
+        const decimals = 18;
+        const readablePrice = (price / (10 ** decimals)).toFixed(6);
+        const readableSupply = (supply / (10 ** decimals)).toLocaleString();
+        const marketCap = (price * supply / (10 ** (2 * decimals))).toFixed(2);
+
+        document.getElementById("price").textContent = $${readablePrice};
+        document.getElementById("supply").textContent = readableSupply;
+        document.getElementById("marketCap").textContent = $${marketCap};
+        document.getElementById("rebase").textContent = ${rebase / 100}%;
+        document.getElementById("burn").textContent = ${burn / 100}%;
+
+        updateCountdown(nextRebase);
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+      }
+    }
+
+    function updateCountdown(nextRebaseTime) {
+      const interval = setInterval(() => {
+        const now = Math.floor(Date.now() / 1000);
+        const seconds = nextRebaseTime - now;
+        if (seconds <= 0) {
+          document.getElementById("rebaseCountdown").textContent = "Rebasing...";
+          clearInterval(interval);
+          fetchBloomStats(); // refresh stats post-rebase
+        } else {
+          const h = Math.floor(seconds / 3600);
+          const m = Math.floor((seconds % 3600) / 60);
+          const s = seconds % 60;
+          document.getElementById("rebaseCountdown").textContent =
+            ${h}h ${m}m ${s}s;
+        }
+      }, 1000);
+    }
+
+    async function connectWallet() {
+      if (typeof window.ethereum !== "undefined") {
+        try {
+          await window.ethereum.request({ method: "eth_requestAccounts" });
+          const web3Wallet = new Web3(window.ethereum);
+          const accounts = await web3Wallet.eth.getAccounts();
+          alert(Connected: ${accounts[0]});
+        } catch (err) {
+          console.error("User denied wallet connection", err);
+        }
+      } else {
+        alert("Please install MetaMask or another Web3 wallet.");
+      }
+    }
+
+    fetchBloomStats();
+  </script>
