@@ -14,20 +14,21 @@ function init() {
   onResize();
   initEventHandlers();
 
-  // Add the persistent intro image
-const img = document.createElement('img');
-img.id = 'bloomIntro';
-img.src = 'https://github.com/RedPillPhil/CryptoRPG/blob/main/0798a23f-1c1a-4235-8ebb-abcc04c8f75b-removebg-preview.png?raw=true';
-img.alt = 'Bloom Intro';
-img.style.position = 'fixed';
-img.style.top = '50%';
-img.style.left = '50%';
-img.style.transform = 'translate(-50%, -50%)';
-img.style.width = '20%'; // Reduced from 40% to 20%
-img.style.zIndex = 0;
-img.style.pointerEvents = 'none'; // So it doesn’t block clicks
-document.body.appendChild(img);
-}
+    new Flower({
+      parent: svg,
+      x: 0,
+      y: 0,
+      petals: 8,
+      rings: 12,
+      step: 4,
+      colors: ['#21B91B', '#FFFF80', '#D1104D', '#7F266A'],
+      alpha: 0.8,
+      angle: rnd(PI),
+      layerAnim: 'layerAnim5',
+      reverseDelay: false });
+
+  }
+
 
   function initEventHandlers() {
     window.addEventListener('resize', onResize);
