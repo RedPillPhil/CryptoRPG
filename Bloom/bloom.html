@@ -36,15 +36,22 @@
     <li id="walletAddress">Wallet: Connecting...</li>
 
     <!-- Rebase Button below the list -->
+    <!-- Add the Rebase Button as part of the stats list -->
     <li id="rebaseItem">
-      <div style="text-align: left; margin-top: 20px; margin-left: 100px;">
-        <button id="rebaseButton" disabled>🌸 Bloom</button>
-      </div>
+      <center><button id="rebaseButton">🌸 Bloom</button></center>
     </li>
   </ul>
-</section>
+
 
 <style>
+  #rebaseLayer {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000; /* Above everything including flower script */
+    pointer-events: auto;
+  }
+
   #rebaseButton {
     font-family: Montserrat, sans-serif;
     font-size: 1rem;
@@ -54,58 +61,23 @@
     color: white;
     border: none;
     cursor: pointer;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
     transition: background-color 0.2s;
   }
 
   #rebaseButton:hover {
     background-color: #66c;
   }
-
-  /* Disabled state */
-  #rebaseButton:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-  }
 </style>
 
+
 <script>
-  // Function to check if countdown reaches 0 and enable button
-  function checkCountdown() {
-    const countdownElement = document.getElementById('countdown');
-    let countdownValue = parseInt(countdownElement.textContent);
-
-    // Ensure countdown value is a valid number
-    if (isNaN(countdownValue)) {
-      console.error("Countdown value is invalid.");
-      return;
-    }
-
-    // If countdown reaches 0, enable the button
-    if (countdownValue <= 0) {
-      document.getElementById('rebaseButton').disabled = false;
-      clearInterval(countdownInterval);  // Stop further countdown checks
-    }
-  }
-
-  // Initial setup: Ensure countdown is not set by default
-  window.onload = () => {
-    const countdownElement = document.getElementById('countdown');
-    countdownElement.textContent = ""; // Ensure countdown is empty initially
-  };
-
-  // Start checking countdown once the countdown is initialized
-  const countdownInterval = setInterval(checkCountdown, 1000);  // Checks every second
-
-  // Rebase Button Functionality
   document.getElementById('rebaseButton').addEventListener('click', (e) => {
-    e.stopImmediatePropagation();  // Block flower script
-    e.preventDefault();            // Stop default behavior
+    e.stopPropagation(); // Protect against flower effect just in case
     console.log("Rebase button clicked!");
-    triggerRebase();               // Call your rebase logic
+    triggerRebase(); // Call your rebase function here
   });
 </script>
-
 
 
 
