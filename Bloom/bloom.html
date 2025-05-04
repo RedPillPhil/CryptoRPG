@@ -43,97 +43,109 @@
 </footer>
 
 <!-- Script -->
-<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
 <script>
-  const bloomTokenAddress = "0x4A67A65c2fdB0397fa41eFC3896b0eCD4c2d006E";
-  const lpAddress = "0x8cccbb96e0f8d491c611dd2Ab5f45753728A167a";
+  const bloomAddress = "0x4A67A65c2fdB0397fa41eFC3896b0eCD4c2d006E";
+  const baseRpc = "https://rpc.ankr.com/base/d41098a1457bd77208ea6662406dcdafc4567718858a40ae83788b601c854349";
+  const web3 = new Web3(baseRpc);
+
   const bloomAbi = [
-    "function totalSupply() view returns (uint256)",
-    "function basePercent() view returns (uint256)",
-    "function getNextRebaseTime() view returns (uint256)"
+    { constant: true, inputs: [], name: "totalSupply", outputs: [{ name: "", type: "uint256" }], type: "function" },
+    { constant: true, inputs: [], name: "getPrice", outputs: [{ name: "", type: "uint256" }], type: "function" },
+    { constant: true, inputs: [], name: "rebasePercent", outputs: [{ name: "", type: "uint256" }], type: "function" },
+    { constant: true, inputs: [], name: "burnPercent", outputs: [{ name: "", type: "uint256" }], type: "function" },
+    {
+      anonymous: false,
+      inputs: [
+        { indexed: false, internalType: "uint256", name: "epoch", type: "uint256" },
+        { indexed: false, internalType: "uint256", name: "totalSupply", type: "uint256" }
+      ],
+      name: "LogRebase",
+      type: "event"
+    }
   ];
-  const lpAbi = [
-    "function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)",
-    "function token0() view returns (address)",
-    "function token1() view returns (address)"
-  ];
-  const provider = new ethers.providers.JsonRpcProvider("https://rpc.ankr.com/base/d41098a1457bd77208ea6662406dcdafc4567718858a40ae83788b601c854349");
+
+  const bloom = new web3.eth.Contract(bloomAbi, bloomAddress);
 
   async function fetchBloomStats() {
     try {
-      const bloom = new ethers.Contract(bloomTokenAddress, bloomAbi, provider);
-      const lp = new ethers.Contract(lpAddress, lpAbi, provider);
-
-      const [supplyRaw, basePercent, nextRebaseTime, reserves, token0, token1] = await Promise.all([
-        bloom.totalSupply(),
-        bloom.basePercent(),
-        bloom.getNextRebaseTime(),
-        lp.getReserves(),
-        lp.token0(),
-        lp.token1()
+      const [price, supply, rebase, burn] = await Promise.all([
+        bloom.methods.getPrice().call(),
+        bloom.methods.totalSupply().call(),
+        bloom.methods.rebasePercent().call(),
+        bloom.methods.burnPercent().call()
       ]);
 
-      const decimals = 6;
-      const supply = parseFloat(ethers.utils.formatUnits(supplyRaw, decimals));
-      const [reserve0, reserve1] = reserves;
-      const bloomIsToken0 = token0.toLowerCase() === bloomTokenAddress.toLowerCase();
-      const bloomReserve = bloomIsToken0 ? reserve0 : reserve1;
-      const usdcReserve = bloomIsToken0 ? reserve1 : reserve0;
-      const price = (usdcReserve / 10 ** 6) / (bloomReserve / 10 ** 6);
-      const marketCap = supply * price;
+      const decimals = 6; // Both Bloom and USDC use 6 decimals
+      const readablePrice = (price / (10 ** decimals)).toFixed(6);
+      const readableSupply = (supply / (10 ** decimals)).toLocaleString();
+      const marketCap = ((price * supply) / (10 ** (2 * decimals))).toFixed(2);
 
-      document.getElementById("price").textContent = `Price: $${price.toFixed(6)}`;
-      document.getElementById("totalSupply2").textContent = `Supply: ${supply.toFixed(6)} BLOOM`;
-      document.getElementById("marketCap2").textContent = `Market Cap: $${marketCap.toFixed(2)}`;
-      document.getElementById("upcomingRebasePercentage").textContent = `Bloom Rate: +${(basePercent / 100).toFixed(2)}%`;
-      document.getElementById("basePercent").textContent = `Burn: ${(basePercent / 100).toFixed(2)}%`;
+      document.getElementById("price").textContent = `Price: $${readablePrice}`;
+      document.getElementById("totalSupply2").textContent = `Supply: ${readableSupply} BLOOM`;
+      document.getElementById("marketCap2").textContent = `Market Cap: $${marketCap}`;
+      document.getElementById("upcomingRebasePercentage").textContent = `Bloom Rate: ${rebase / 100}%`;
+      document.getElementById("basePercent").textContent = `Burn: ${burn / 100}%`;
 
-      startCountdown(nextRebaseTime.toNumber());
-    } catch (err) {
-      console.error("Error fetching Bloom stats:", err);
-    }
-  }
+      // Fetch latest LogRebase event and calculate next rebase
+      const latest = await bloom.getPastEvents("LogRebase", {
+        fromBlock: 'latest',
+        toBlock: 'latest'
+      });
 
-  function startCountdown(nextRebaseTimestamp) {
-    const countdownEl = document.getElementById("countdown2");
-
-    function updateCountdown() {
-      const now = Math.floor(Date.now() / 1000);
-      const seconds = nextRebaseTimestamp - now;
-      if (seconds <= 0) {
-        countdownEl.textContent = "Rebasing...";
-        fetchBloomStats(); // refresh stats after rebase
+      if (latest.length === 0) {
+        document.getElementById("countdown2").textContent = "Next Bloom: Unknown";
         return;
       }
-      const h = Math.floor(seconds / 3600);
-      const m = Math.floor((seconds % 3600) / 60);
-      const s = seconds % 60;
-      countdownEl.textContent = `Next Bloom: ${h}h ${m}m ${s}s.`;
-    }
 
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
+      const block = await web3.eth.getBlock(latest[0].blockNumber);
+      const nextRebaseTime = Number(block.timestamp) + 86400;
+      updateCountdown(nextRebaseTime);
+    } catch (error) {
+      console.error("Error fetching Bloom stats:", error);
+    }
   }
 
-  async function connectWallet() {
+  function updateCountdown(nextRebaseTime) {
+    const countdownEl = document.getElementById("countdown2");
+    const interval = setInterval(() => {
+      const now = Math.floor(Date.now() / 1000);
+      const seconds = nextRebaseTime - now;
+      if (seconds <= 0) {
+        countdownEl.textContent = "Rebasing...";
+        clearInterval(interval);
+        fetchBloomStats(); // Refresh after rebase
+      } else {
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = seconds % 60;
+        countdownEl.textContent = `Next Bloom: ${h}h ${m}m ${s}s`;
+      }
+    }, 1000);
+  }
+
+  async function autoConnectWallet() {
     const walletEl = document.getElementById("walletAddress");
-    if (window.ethereum) {
+    if (typeof window.ethereum !== "undefined") {
       try {
         const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
         walletEl.textContent = `Wallet: ${accounts[0]}`;
-      } catch {
+      } catch (err) {
         walletEl.textContent = "Wallet: Connection rejected";
+        console.warn("Wallet connection rejected.");
       }
     } else {
       walletEl.textContent = "Wallet: MetaMask not detected";
+      alert("MetaMask not detected. Please install MetaMask to use this site.");
     }
   }
 
-  window.addEventListener("load", () => {
-    connectWallet();
+  window.addEventListener("load", async () => {
+    await autoConnectWallet();
     fetchBloomStats();
   });
 </script>
+
 
 
 <!-- Your original flower-generating script -->
