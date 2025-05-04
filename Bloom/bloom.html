@@ -35,34 +35,16 @@
     <li id="countdown2">Next Bloom: <span id="countdown"></span></li>
     <li id="walletAddress">Wallet: Connecting...</li>
 
-    <!-- Rebase Button Centered -->
+    <!-- Rebase Button below the list -->
     <li id="rebaseItem">
-      <button id="rebaseButton" disabled>🌸 Bloom</button>
+      <div style="text-align: left; margin-top: 20px; margin-left: 100px;">
+        <button id="rebaseButton" disabled>🌸 Bloom</button>
+      </div>
     </li>
   </ul>
 </section>
 
-
-
 <style>
-  #bloom-stats {
-    list-style: none;
-    padding: 1em;
-    font-family: Montserrat;
-  }
-
-  #bloom-stats li {
-    margin-bottom: 10px; /* Add some space between list items */
-  }
-
-  /* Center the rebase button */
-  #rebaseItem {
-    display: flex;
-    justify-content: center; /* Centers the button horizontally */
-    margin-top: 20px; /* Optional: add space before the button */
-  }
-
-  /* Style the button */
   #rebaseButton {
     font-family: Montserrat, sans-serif;
     font-size: 1rem;
@@ -72,7 +54,7 @@
     color: white;
     border: none;
     cursor: pointer;
-    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     transition: background-color 0.2s;
   }
 
@@ -80,32 +62,27 @@
     background-color: #66c;
   }
 
-  /* Disable button style */
+  /* Disabled state */
   #rebaseButton:disabled {
     background-color: #ccc;
     cursor: not-allowed;
   }
 </style>
 
-
 <script>
-  // Disable the button by default
-  document.getElementById('rebaseButton').disabled = true;
-
-  // Function to update the countdown and handle enabling the button
+  // Function to handle rebase countdown
   function updateCountdown() {
     const countdownElement = document.getElementById('countdown');
-    const countdownValue = parseInt(countdownElement.textContent); // Assuming the countdown is a number
+    let countdownValue = parseInt(countdownElement.textContent);
 
-    // If countdown reaches 0, enable the button
     if (countdownValue <= 0) {
+      // Enable the button when countdown reaches 0
       document.getElementById('rebaseButton').disabled = false;
     }
   }
 
-  // Update countdown every second (example, adjust as needed)
+  // Update countdown every second
   setInterval(() => {
-    // Update countdown display, make sure it's in a number format
     const countdownElement = document.getElementById('countdown');
     let countdownValue = parseInt(countdownElement.textContent);
 
@@ -113,18 +90,19 @@
       countdownValue--;
       countdownElement.textContent = countdownValue;
     }
-    
-    // Enable button when countdown reaches 0
-    updateCountdown();
+
+    updateCountdown(); // Enable button when countdown reaches 0
   }, 1000);
 
-  // Make the Rebase Button functional
+  // Rebase Button Functionality
   document.getElementById('rebaseButton').addEventListener('click', (e) => {
     e.stopPropagation(); // Prevent any unwanted interaction
     console.log("Rebase button clicked!");
-    triggerRebase(); // Call your rebase function here
+    triggerRebase(); // Your rebase function
   });
 </script>
+
+
 
 
 
