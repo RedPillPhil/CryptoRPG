@@ -661,7 +661,7 @@
     ], lpPairAddress);
 
 
- async function getLastRebaseTime() {
+  async function getLastRebaseTime() {
     try {
       const latestBlock = await web3.eth.getBlockNumber();
       let fromBlock = latestBlock - 99999;
@@ -692,7 +692,6 @@
       const block = await web3.eth.getBlock(latestEvent.blockNumber);
       const lastRebaseTimestamp = block.timestamp;
       const nextRebaseTimestamp = lastRebaseTimestamp + 86400; // 24 hours
-
       return nextRebaseTimestamp;
     } catch (error) {
       console.error("Failed to get last rebase time:", error);
@@ -718,28 +717,32 @@
   }
 
   async function fetchStats() {
-    const supply = await bloom.methods.totalSupply().call();
-    const decimals = await bloom.methods.decimals().call();
-    const basePercent = await bloom.methods.basePercent().call();
+    try {
+      const supply = await bloom.methods.totalSupply().call();
+      const decimals = await bloom.methods.decimals().call();
+      const basePercent = await bloom.methods.basePercent().call();
 
-    // Get reserves
-    const token0 = await lp.methods.token0().call();
-    const reserves = await lp.methods.getReserves().call();
-    const reserveBloom = token0.toLowerCase() === bloomTokenAddress.toLowerCase() ? reserves._reserve0 : reserves._reserve1;
-    const reserveUSDC = token0.toLowerCase() === bloomTokenAddress.toLowerCase() ? reserves._reserve1 : reserves._reserve0;
+      const token0 = await lp.methods.token0().call();
+      const reserves = await lp.methods.getReserves().call();
+      const reserveBloom = token0.toLowerCase() === bloomTokenAddress.toLowerCase()
+        ? reserves._reserve0
+        : reserves._reserve1;
+      const reserveUSDC = token0.toLowerCase() === bloomTokenAddress.toLowerCase()
+        ? reserves._reserve1
+        : reserves._reserve0;
 
-    const price = reserveUSDC / reserveBloom;
-    const totalSupplyFormatted = supply / (10 ** decimals);
-    const marketCap = totalSupplyFormatted * price;
-    const burnRate = 100 / basePercent;
+      const price = reserveUSDC / reserveBloom;
+      const totalSupplyFormatted = supply / (10 ** decimals);
+      const marketCap = totalSupplyFormatted * price;
+      const burnRate = 100 / basePercent;
 
-    // Update DOM
-    document.getElementById('totalSupply').innerText = totalSupplyFormatted.toFixed(2);
-    document.getElementById('price').innerText = price.toFixed(2);
-    document.getElementById('marketCap').innerText = marketCap.toFixed(2);
-    document.getElementById('burnRate').innerText = burnRate.toFixed(2);
+      document.getElementById('totalSupply').innerText = totalSupplyFormatted.toFixed(2);
+      document.getElementById('price').innerText = price.toFixed(2);
+      document.getElementById('marketCap').innerText = marketCap.toFixed(2);
+      document.getElementById('burnRate').innerText = burnRate.toFixed(2);
 
       fetchUpcomingRebasePercentage();
+      updateRebaseCountdown();
     } catch (error) {
       console.error("Error fetching stats:", error);
     }
@@ -754,7 +757,6 @@
       document.getElementById("upcomingRebasePercentage").innerText = "Error";
     }
   }
-
 
   async function connectWallet() {
     if (window.ethereum) {
@@ -791,7 +793,8 @@
   window.addEventListener('load', async () => {
     await connectWallet();
     await fetchStats();
-    setInterval(fetchStats, 15000); // Refresh every 15 seconds
+    setInterval(fetchStats, 15000); // Refresh every 15s
+    setInterval(updateRebaseCountdown, 1000); // Update countdown every second
   });
 </script>
 
