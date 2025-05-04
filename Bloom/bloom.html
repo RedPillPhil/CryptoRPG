@@ -28,7 +28,7 @@
 <section>
   <ul id="bloom-stats" style="list-style: none; padding: 1em; font-family: Montserrat;">
 
-  <li id="price">Price: $<span id="price"></span></li>
+  <li id="price">Price: $Price: $<span id="price"></span></li>
   <li id="upcomingRebasePercentage">Rebase: Loading...</li>
   <li id="basePercent">Burn: <span id="burnRate"></span>%</li>
   <li id="totalSupply2">Supply: <span id="totalSupply"></span></li>
@@ -677,7 +677,7 @@
       const price = reserveUSDC / reserveBloom;
       const totalSupplyFormatted = supply / (10 ** decimals);
       const marketCap = totalSupplyFormatted * price;
-      const burnRate = basePercent / 100;
+      const burnRate = 100 / basePercent;
 
       // Countdown logic (1 hour rebases)
       const now = Math.floor(Date.now() / 1000);
@@ -687,7 +687,7 @@
 
       // Update DOM
       document.getElementById('totalSupply').innerText = totalSupplyFormatted.toFixed(2);
-      document.getElementById('price').innerText = price.toFixed(6);
+      document.getElementById('price').innerText = price.toFixed(2);
       document.getElementById('marketCap').innerText = marketCap.toFixed(2);
       document.getElementById('burnRate').innerText = burnRate.toFixed(2);
       document.getElementById('countdown').innerText = countdown;
