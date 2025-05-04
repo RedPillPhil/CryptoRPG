@@ -15,18 +15,18 @@ function init() {
   initEventHandlers();
 
   // Add the persistent intro image
-  const img = document.createElement('img');
-  img.id = 'bloomIntro';
-  img.src = 'https://github.com/RedPillPhil/CryptoRPG/blob/main/0798a23f-1c1a-4235-8ebb-abcc04c8f75b-removebg-preview.png?raw=true';
-  img.alt = 'Bloom Intro';
-  img.style.position = 'fixed';
-  img.style.top = '50%';
-  img.style.left = '50%';
-  img.style.transform = 'translate(-50%, -50%)';
-  img.style.width = '40%';
-  img.style.zIndex = 0;
-  img.style.pointerEvents = 'none'; // So it doesn’t block clicks
-  document.body.appendChild(img);
+const img = document.createElement('img');
+img.id = 'bloomIntro';
+img.src = 'https://github.com/RedPillPhil/CryptoRPG/blob/main/0798a23f-1c1a-4235-8ebb-abcc04c8f75b-removebg-preview.png?raw=true';
+img.alt = 'Bloom Intro';
+img.style.position = 'fixed';
+img.style.top = '50%';
+img.style.left = '50%';
+img.style.transform = 'translate(-50%, -50%)';
+img.style.width = '20%'; // Reduced from 40% to 20%
+img.style.zIndex = 0;
+img.style.pointerEvents = 'none'; // So it doesn’t block clicks
+document.body.appendChild(img);
 }
 
   function initEventHandlers() {
