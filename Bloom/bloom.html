@@ -739,16 +739,37 @@
     document.getElementById('marketCap').innerText = marketCap.toFixed(2);
     document.getElementById('burnRate').innerText = burnRate.toFixed(2);
 
-    await updateRebaseCountdown();
+      fetchUpcomingRebasePercentage();
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    }
   }
+
+  async function fetchUpcomingRebasePercentage() {
+    try {
+      const rate = await bloom.methods.upcomingRebasePercentage().call();
+      document.getElementById("upcomingRebasePercentage").innerText = `${rate}%`;
+    } catch (err) {
+      console.error("Failed to fetch rebase %:", err);
+      document.getElementById("upcomingRebasePercentage").innerText = "Error";
+    }
+  }
+
 
   async function connectWallet() {
     if (window.ethereum) {
-      window.web3 = new Web3(window.ethereum);
-      await ethereum.request({ method: 'eth_requestAccounts' });
-      alert('Wallet connected');
+      try {
+        window.web3 = new Web3(window.ethereum);
+        const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+        const wallet = accounts[0];
+        document.getElementById('walletAddress').innerText = `Wallet: ${wallet}`;
+      } catch (err) {
+        console.error("Wallet connection error:", err);
+        document.getElementById('walletAddress').innerText = "Wallet: Error";
+      }
     } else {
-      alert('MetaMask not detected');
+      alert("MetaMask not detected");
+      document.getElementById('walletAddress').innerText = "Wallet: Not Detected";
     }
   }
 
@@ -767,8 +788,11 @@
     }
   }
 
-  fetchStats();
-  setInterval(fetchStats, 15000); // Refresh every 15 seconds
+  window.addEventListener('load', async () => {
+    await connectWallet();
+    await fetchStats();
+    setInterval(fetchStats, 15000); // Refresh every 15 seconds
+  });
 </script>
 
 
