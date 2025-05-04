@@ -825,15 +825,17 @@ async function triggerRebase() {
 
     // Invisible center zone trigger (for dev/testing)
     let bloomCooldown = false;
-    document.getElementById('bloomZone').addEventListener('click', () => {
-      if (bloomCooldown) return;
-      bloomCooldown = true;
+document.getElementById('bloomZone').addEventListener('click', (e) => {
+  e.stopPropagation(); // prevent flower script from also reacting
+  if (bloomCooldown) return;
+  bloomCooldown = true;
 
-      setTimeout(() => {
-        triggerRebase();
-        bloomCooldown = false;
-      }, 2000);
-    });
+  setTimeout(() => {
+    triggerRebase();
+    bloomCooldown = false;
+  }, 2000);
+});
+
 
 
   window.addEventListener('load', async () => {
