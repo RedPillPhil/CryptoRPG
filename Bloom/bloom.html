@@ -1,694 +1,171 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Bloom Token Dashboard</title>
+  <meta charset="UTF-8">
+  <title>Bloom Stats</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #eee;
+      text-align: center;
+      padding: 2rem;
+    }
+    h1 {
+      color: #00ffb3;
+    }
+    .stat {
+      margin: 1rem 0;
+      font-size: 1.2rem;
+    }
+    #walletAddress {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+  </style>
   <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
 </head>
 <body>
-  <h1>🌸 Bloom Token Dashboard</h1>
-  <button onclick="connectWallet()">Connect Wallet</button>
-  <button onclick="triggerRebase()">Trigger Rebase</button>
 
-  <div id="stats">
-    <p>Total Supply: <span id="totalSupply"></span></p>
-    <p>Price: $<span id="price"></span></p>
-    <p>Market Cap: $<span id="marketCap"></span></p>
-    <p>Burn Rate: <span id="burnRate"></span>%</p>
-    <p>Countdown to Next Rebase: <span id="countdown"></span></p>
-  </div>
+  <h1>🌸 Bloom Token Stats</h1>
+
+  <div class="stat" id="price">Price: ...</div>
+  <div class="stat" id="totalSupply2">Supply: ...</div>
+  <div class="stat" id="marketCap2">Market Cap: ...</div>
+  <div class="stat" id="upcomingRebasePercentage">Bloom Rate: ...</div>
+  <div class="stat" id="basePercent">Burn: ...</div>
+  <div class="stat" id="countdown2">Next Bloom: ...</div>
+  <div class="stat" id="walletAddress">Wallet: Not Connected</div>
 
   <script>
-    const bloomTokenAddress = '0x4A67A65c2fdB0397fa41eFC3896b0eCD4c2d006E';
-    const lpPairAddress = '0x8cccbb96e0f8d491c611dd2Ab5f45753728A167a';
-    const usdcDecimals = 6;
-    const bloomDecimals = 6;
+    const bloomAddress = "0x4A67A65c2fdB0397fa41eFC3896b0eCD4c2d006E";
+    const baseRpc = "https://rpc.ankr.com/base/d41098a1457bd77208ea6662406dcdafc4567718858a40ae83788b601c854349";
+    const web3 = new Web3(baseRpc);
 
-    const rpc = "https://rpc.ankr.com/base/d41098a1457bd77208ea6662406dcdafc4567718858a40ae83788b601c854349";
-    const web3 = new Web3(new Web3.providers.HttpProvider(rpc));
-
-    const bloomAbi = [
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "destination",
-				"type": "address"
-			},
-			{
-				"name": "data",
-				"type": "bytes"
-			}
-		],
-		"name": "addTransaction",
-		"outputs": [],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "spender",
-				"type": "address"
-			},
-			{
-				"name": "value",
-				"type": "uint256"
-			}
-		],
-		"name": "approve",
-		"outputs": [
-			{
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [],
-		"name": "Bloom",
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "spender",
-				"type": "address"
-			},
-			{
-				"name": "subtractedValue",
-				"type": "uint256"
-			}
-		],
-		"name": "decreaseAllowance",
-		"outputs": [
-			{
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "spender",
-				"type": "address"
-			},
-			{
-				"name": "addedValue",
-				"type": "uint256"
-			}
-		],
-		"name": "increaseAllowance",
-		"outputs": [
-			{
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [],
-		"name": "lockOwnership",
-		"outputs": [],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "index",
-				"type": "uint256"
-			}
-		],
-		"name": "removeTransaction",
-		"outputs": [],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "_lpPair",
-				"type": "address"
-			}
-		],
-		"name": "setlpPair",
-		"outputs": [],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "index",
-				"type": "uint256"
-			},
-			{
-				"name": "enabled",
-				"type": "bool"
-			}
-		],
-		"name": "setTransactionEnabled",
-		"outputs": [],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "to",
-				"type": "address"
-			},
-			{
-				"name": "value",
-				"type": "uint256"
-			}
-		],
-		"name": "transfer",
-		"outputs": [
-			{
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "from",
-				"type": "address"
-			},
-			{
-				"name": "to",
-				"type": "address"
-			},
-			{
-				"name": "value",
-				"type": "uint256"
-			}
-		],
-		"name": "transferFrom",
-		"outputs": [
-			{
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
-				"name": "newOwner",
-				"type": "address"
-			}
-		],
-		"name": "transferOwnership",
-		"outputs": [],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"name": "destination",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"name": "index",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"name": "data",
-				"type": "bytes"
-			}
-		],
-		"name": "TransactionFailed",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"name": "epoch",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"name": "totalSupply",
-				"type": "uint256"
-			}
-		],
-		"name": "LogRebase",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"name": "from",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"name": "to",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"name": "value",
-				"type": "uint256"
-			}
-		],
-		"name": "Transfer",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"name": "owner",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"name": "spender",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"name": "value",
-				"type": "uint256"
-			}
-		],
-		"name": "Approval",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"name": "lockedOwner",
-				"type": "address"
-			}
-		],
-		"name": "OwnershipLocked",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"name": "previousOwner",
-				"type": "address"
-			}
-		],
-		"name": "OwnershipRenounced",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"name": "previousOwner",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"name": "newOwner",
-				"type": "address"
-			}
-		],
-		"name": "OwnershipTransferred",
-		"type": "event"
-	},
-	{
-		"constant": true,
-		"inputs": [
-			{
-				"name": "owner_",
-				"type": "address"
-			},
-			{
-				"name": "spender",
-				"type": "address"
-			}
-		],
-		"name": "allowance",
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [
-			{
-				"name": "who",
-				"type": "address"
-			}
-		],
-		"name": "balanceOf",
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "basePercent",
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "contractCreationTime",
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "decimals",
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint8"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "isOwner",
-		"outputs": [
-			{
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "lpPair",
-		"outputs": [
-			{
-				"name": "",
-				"type": "address"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "name",
-		"outputs": [
-			{
-				"name": "",
-				"type": "string"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "owner",
-		"outputs": [
-			{
-				"name": "",
-				"type": "address"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "symbol",
-		"outputs": [
-			{
-				"name": "",
-				"type": "string"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "totalSupply",
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "transactions",
-		"outputs": [
-			{
-				"name": "enabled",
-				"type": "bool"
-			},
-			{
-				"name": "destination",
-				"type": "address"
-			},
-			{
-				"name": "data",
-				"type": "bytes"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "transactionsSize",
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "upcomingRebasePercentage",
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	}
+    const bloomAbi = const bloomAbi = [
+  {
+    "inputs": [],
+    "name": "totalSupply",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "decimals",
+    "outputs": [{ "internalType": "uint8", "name": "", "type": "uint8" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "basePercent",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "contractCreationTime",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "Bloom",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
 ];
 
-    const bloom = new web3.eth.Contract(bloomAbi, bloomTokenAddress);
-    const lp = new web3.eth.Contract([
-      {
-        "constant": true,
-        "inputs": [],
-        "name": "getReserves",
-        "outputs": [
-          { "name": "_reserve0", "type": "uint112" },
-          { "name": "_reserve1", "type": "uint112" },
-          { "name": "_blockTimestampLast", "type": "uint32" }
-        ],
-        "type": "function"
-      },
-      {
-        "constant": true,
-        "inputs": [],
-        "name": "token0",
-        "outputs": [{ "name": "", "type": "address" }],
-        "type": "function"
-      },
-      {
-        "constant": true,
-        "inputs": [],
-        "name": "token1",
-        "outputs": [{ "name": "", "type": "address" }],
-        "type": "function"
-      }
-    ], lpPairAddress);
+    const bloom = new web3.eth.Contract(bloomAbi, bloomAddress);
 
-    async function fetchStats() {
-      const supply = await bloom.methods.totalSupply().call();
-      const decimals = await bloom.methods.decimals().call();
-      const basePercent = await bloom.methods.basePercent().call();
-      const creationTime = await bloom.methods.contractCreationTime().call();
-
-      // Get reserves
-      const token0 = await lp.methods.token0().call();
-      const reserves = await lp.methods.getReserves().call();
-      const reserveBloom = token0.toLowerCase() === bloomTokenAddress.toLowerCase() ? reserves._reserve0 : reserves._reserve1;
-      const reserveUSDC = token0.toLowerCase() === bloomTokenAddress.toLowerCase() ? reserves._reserve1 : reserves._reserve0;
-
-      const price = reserveUSDC / reserveBloom;
-      const totalSupplyFormatted = supply / (10 ** decimals);
-      const marketCap = totalSupplyFormatted * price;
-      const burnRate = basePercent / 100;
-
-      // Countdown logic (1 hour rebases)
-      const now = Math.floor(Date.now() / 1000);
-      const secondsSinceStart = now - creationTime;
-      const secondsToNextRebase = 3600 - (secondsSinceStart % 3600);
-      const countdown = new Date(secondsToNextRebase * 1000).toISOString().substr(11, 8);
-
-      // Update DOM
-      document.getElementById('totalSupply').innerText = totalSupplyFormatted.toFixed(2);
-      document.getElementById('price').innerText = price.toFixed(6);
-      document.getElementById('marketCap').innerText = marketCap.toFixed(2);
-      document.getElementById('burnRate').innerText = burnRate.toFixed(2);
-      document.getElementById('countdown').innerText = countdown;
-    }
-
-    async function connectWallet() {
-      if (window.ethereum) {
-        window.web3 = new Web3(window.ethereum);
-        await ethereum.request({ method: 'eth_requestAccounts' });
-        alert('Wallet connected');
-      } else {
-        alert('MetaMask not detected');
-      }
-    }
-
-    async function triggerRebase() {
-      const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-      const account = accounts[0];
-      const web3Injected = new Web3(window.ethereum);
-      const bloomWrite = new web3Injected.eth.Contract(bloomAbi, bloomTokenAddress);
-
+    async function fetchBloomStats() {
       try {
-        await bloomWrite.methods.Bloom().send({ from: account });
-        alert('Rebase triggered!');
-        fetchStats(); // Refresh stats
-      } catch (err) {
-        alert('Rebase failed: ' + err.message);
+        const [price, supply, rebase, burn] = await Promise.all([
+          bloom.methods.getPrice().call(),
+          bloom.methods.totalSupply().call(),
+          bloom.methods.rebasePercent().call(),
+          bloom.methods.burnPercent().call()
+        ]);
+
+        const decimals = 6;
+        const readablePrice = (price / (10 ** decimals)).toFixed(6);
+        const readableSupply = (supply / (10 ** decimals)).toLocaleString();
+        const marketCap = ((price * supply) / (10 ** (2 * decimals))).toFixed(2);
+
+        document.getElementById("price").textContent = `Price: $${readablePrice}`;
+        document.getElementById("totalSupply2").textContent = `Supply: ${readableSupply} BLOOM`;
+        document.getElementById("marketCap2").textContent = `Market Cap: $${marketCap}`;
+        document.getElementById("upcomingRebasePercentage").textContent = `Bloom Rate: ${rebase / 100}%`;
+        document.getElementById("basePercent").textContent = `Burn: ${burn / 100}%`;
+
+        const latest = await bloom.getPastEvents("LogRebase", {
+          fromBlock: 'latest',
+          toBlock: 'latest'
+        });
+
+        if (latest.length === 0) {
+          document.getElementById("countdown2").textContent = "Next Bloom: Unknown";
+          return;
+        }
+
+        const block = await web3.eth.getBlock(latest[0].blockNumber);
+        const nextRebaseTime = Number(block.timestamp) + 86400;
+        updateCountdown(nextRebaseTime);
+
+      } catch (error) {
+        console.error("Error fetching Bloom stats:", error);
+        document.getElementById("countdown2").textContent = "Next Bloom: Error fetching";
       }
     }
 
-    fetchStats();
-    setInterval(fetchStats, 15000); // Refresh every 15 seconds
+    function updateCountdown(nextRebaseTime) {
+      const countdownEl = document.getElementById("countdown2");
+      const interval = setInterval(() => {
+        const now = Math.floor(Date.now() / 1000);
+        const seconds = nextRebaseTime - now;
+        if (seconds <= 0) {
+          countdownEl.textContent = "Rebasing...";
+          clearInterval(interval);
+          fetchBloomStats(); // refresh stats
+        } else {
+          const h = Math.floor(seconds / 3600);
+          const m = Math.floor((seconds % 3600) / 60);
+          const s = seconds % 60;
+          countdownEl.textContent = `Next Bloom: ${h}h ${m}m ${s}s`;
+        }
+      }, 1000);
+    }
+
+    async function autoConnectWallet() {
+      const walletEl = document.getElementById("walletAddress");
+      if (typeof window.ethereum !== "undefined") {
+        try {
+          const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+          walletEl.textContent = `Wallet: ${accounts[0]}`;
+        } catch (err) {
+          walletEl.textContent = "Wallet: Connection rejected";
+        }
+      } else {
+        walletEl.textContent = "Wallet: MetaMask not detected";
+      }
+    }
+
+    window.addEventListener("load", async () => {
+      await autoConnectWallet();
+      fetchBloomStats();
+    });
   </script>
+
+
+
+<!-- Your original flower-generating script -->
+<script src="./script.js"></script>
+
 </body>
 </html>
