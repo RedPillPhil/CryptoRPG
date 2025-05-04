@@ -1,29 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Bloom Token Stats</title>
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <style>
-    body { font-family: sans-serif; background-color: #111; color: #0f0; padding: 20px; }
-    h1 { color: #fff; }
-    .stat { margin-bottom: 10px; }
-  </style>
-</head>
-<body>
-  <h1>🌸 Bloom Token Dashboard</h1>
-  <div class="stat">Price: <span id="price">Loading...</span></div>
-  <div class="stat">Supply: <span id="supply">Loading...</span></div>
-  <div class="stat">Market Cap: <span id="marketcap">Loading...</span></div>
-  <div class="stat">Rebase %: <span id="rebase">Loading...</span></div>
-  <div class="stat">Burn %: <span id="burn">Loading...</span></div>
-  <div class="stat">Next Rebase In: <span id="countdown">Loading...</span></div>
-
-  <script>
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
     const provider = new ethers.providers.JsonRpcProvider("https://rpc.ankr.com/base/d41098a1457bd77208ea6662406dcdafc4567718858a40ae83788b601c854349");
 
     const bloomToken = "0x4A67A65c2fdB0397fa41eFC3896b0eCD4c2d006E";
-    const usdcToken = "0xd9AA594F6EcC163A497065eAe3e01B5E3dA1c648"; // USDC on Base
-    const pairAddress = "0x8cccbb96e0f8d491c611dd2Ab5f45753728A167a"; // Bloom/USDC pair
+    const pairAddress = "0x8cccbb96e0f8d491c611dd2Ab5f45753728A167a";
 
     const bloomAbi = [
       "function totalSupply() view returns (uint256)",
@@ -50,7 +30,7 @@
           bloom.lastRebasedTime()
         ]);
 
-        const supply = Number(supplyRaw) / 1e6; // 6 decimals
+        const supply = Number(supplyRaw) / 1e6;
         const rebase = Number(rebaseRaw) / 100;
         const burn = Number(burnRaw) / 100;
 
@@ -88,12 +68,10 @@
 
       } catch (err) {
         console.error("Failed to load stats:", err);
-        alert("Error fetching Bloom data. See console for details.");
       }
     }
 
     loadStats();
-    setInterval(loadStats, 15000); // Refresh every 15 sec
-  </script>
-</body>
-</html>
+    setInterval(loadStats, 15000);
+  });
+</script>
