@@ -35,15 +35,19 @@
     <li id="countdown2">Next Bloom: <span id="countdown"></span></li>
     <li id="walletAddress">Wallet: Connecting...</li>
 
- <li id="rebaseItem">
-      <div style="text-align: left; margin-top: 20px; margin-left: 100px;">
-        <button id="rebaseButton" disabled>🌸 Bloom</button>
-      </div>
-    </li>
-  </ul>
-</section>
+<div id="rebaseLayer">
+  <button id="rebaseButton" disabled>🌸 Bloom</button>
+</div>
 
 <style>
+  #rebaseLayer {
+    position: fixed;
+    bottom: 40px;
+    left: 100px;
+    z-index: 10000; /* Above flower canvas */
+    pointer-events: auto;
+  }
+
   #rebaseButton {
     font-family: Montserrat, sans-serif;
     font-size: 1rem;
@@ -55,14 +59,12 @@
     cursor: pointer;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     transition: background-color 0.2s;
-  z-index: 10000;
   }
 
   #rebaseButton:hover {
     background-color: #66c;
   }
 
-  /* Disabled state */
   #rebaseButton:disabled {
     background-color: #ccc;
     cursor: not-allowed;
