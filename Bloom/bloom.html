@@ -1,77 +1,95 @@
-<script>
-  window.addEventListener('DOMContentLoaded', () => {
-    const provider = new ethers.providers.JsonRpcProvider("https://rpc.ankr.com/base/d41098a1457bd77208ea6662406dcdafc4567718858a40ae83788b601c854349");
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bloom Stats</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+</head>
+<body>
+  <div>
+    <p>Price: <span id="price">Loading...</span></p>
+    <p>Total Supply: <span id="supply">Loading...</span></p>
+    <p>Market Cap: <span id="marketcap">Loading...</span></p>
+    <p>Rebase %: <span id="rebase">Loading...</span></p>
+    <p>Burn %: <span id="burn">Loading...</span></p>
+    <p>Next Rebase: <span id="countdown">Loading...</span></p>
+  </div>
 
-    const bloomToken = "0x4A67A65c2fdB0397fa41eFC3896b0eCD4c2d006E";
-    const pairAddress = "0x8cccbb96e0f8d491c611dd2Ab5f45753728A167a";
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const provider = new ethers.providers.JsonRpcProvider("https://rpc.ankr.com/base/d41098a1457bd77208ea6662406dcdafc4567718858a40ae83788b601c854349");
 
-    const bloomAbi = [
-      "function totalSupply() view returns (uint256)",
-      "function getRebasePercent() view returns (uint256)",
-      "function getBurnPercent() view returns (uint256)",
-      "function lastRebasedTime() view returns (uint256)"
-    ];
+      const bloomToken = "0x4A67A65c2fdB0397fa41eFC3896b0eCD4c2d006E";
+      const pairAddress = "0x8cccbb96e0f8d491c611dd2Ab5f45753728A167a";
 
-    const pairAbi = [
-      "function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)",
-      "function token0() view returns (address)",
-      "function token1() view returns (address)"
-    ];
+      const bloomAbi = [
+        "function totalSupply() view returns (uint256)",
+        "function getRebasePercent() view returns (uint256)",
+        "function getBurnPercent() view returns (uint256)",
+        "function lastRebasedTime() view returns (uint256)"
+      ];
 
-    async function loadStats() {
-      const bloom = new ethers.Contract(bloomToken, bloomAbi, provider);
-      const pair = new ethers.Contract(pairAddress, pairAbi, provider);
+      const pairAbi = [
+        "function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)",
+        "function token0() view returns (address)",
+        "function token1() view returns (address)"
+      ];
 
-      try {
-        const [supplyRaw, rebaseRaw, burnRaw, lastRebase] = await Promise.all([
-          bloom.totalSupply(),
-          bloom.getRebasePercent(),
-          bloom.getBurnPercent(),
-          bloom.lastRebasedTime()
-        ]);
+      async function loadStats() {
+        const bloom = new ethers.Contract(bloomToken, bloomAbi, provider);
+        const pair = new ethers.Contract(pairAddress, pairAbi, provider);
 
-        const supply = Number(supplyRaw) / 1e6;
-        const rebase = Number(rebaseRaw) / 100;
-        const burn = Number(burnRaw) / 100;
+        try {
+          const [supplyRaw, rebaseRaw, burnRaw, lastRebase] = await Promise.all([
+            bloom.totalSupply(),
+            bloom.getRebasePercent(),
+            bloom.getBurnPercent(),
+            bloom.lastRebasedTime()
+          ]);
 
-        const [token0, token1] = await Promise.all([pair.token0(), pair.token1()]);
-        const [res0, res1] = await pair.getReserves();
+          const supply = Number(supplyRaw) / 1e6;
+          const rebase = Number(rebaseRaw) / 100;
+          const burn = Number(burnRaw) / 100;
 
-        let bloomReserve, usdcReserve;
+          const [token0, token1] = await Promise.all([pair.token0(), pair.token1()]);
+          const [res0, res1] = await pair.getReserves();
 
-        if (token0.toLowerCase() === bloomToken.toLowerCase()) {
-          bloomReserve = Number(res0) / 1e6;
-          usdcReserve = Number(res1) / 1e6;
-        } else {
-          bloomReserve = Number(res1) / 1e6;
-          usdcReserve = Number(res0) / 1e6;
+          let bloomReserve, usdcReserve;
+
+          if (token0.toLowerCase() === bloomToken.toLowerCase()) {
+            bloomReserve = Number(res0) / 1e6;
+            usdcReserve = Number(res1) / 1e6;
+          } else {
+            bloomReserve = Number(res1) / 1e6;
+            usdcReserve = Number(res0) / 1e6;
+          }
+
+          const price = usdcReserve / bloomReserve;
+          const marketCap = supply * price;
+
+          const now = Math.floor(Date.now() / 1000);
+          const nextRebase = lastRebase + 86400;
+          const secondsLeft = Math.max(0, nextRebase - now);
+
+          const hours = Math.floor(secondsLeft / 3600);
+          const minutes = Math.floor((secondsLeft % 3600) / 60);
+          const seconds = secondsLeft % 60;
+          const countdown = `${hours}h ${minutes}m ${seconds}s`;
+
+          document.getElementById("price").textContent = "$" + price.toFixed(4);
+          document.getElementById("supply").textContent = supply.toLocaleString();
+          document.getElementById("marketcap").textContent = "$" + marketCap.toLocaleString(undefined, { maximumFractionDigits: 0 });
+          document.getElementById("rebase").textContent = rebase.toFixed(2) + "%";
+          document.getElementById("burn").textContent = burn.toFixed(2) + "%";
+          document.getElementById("countdown").textContent = countdown;
+
+        } catch (err) {
+          console.error("Failed to load stats:", err);
         }
-
-        const price = usdcReserve / bloomReserve;
-        const marketCap = supply * price;
-
-        const now = Math.floor(Date.now() / 1000);
-        const nextRebase = lastRebase + 86400;
-        const secondsLeft = Math.max(0, nextRebase - now);
-
-        const hours = Math.floor(secondsLeft / 3600);
-        const minutes = Math.floor((secondsLeft % 3600) / 60);
-        const seconds = secondsLeft % 60;
-        const countdown = `${hours}h ${minutes}m ${seconds}s`;
-
-        document.getElementById("price").textContent = "$" + price.toFixed(4);
-        document.getElementById("supply").textContent = supply.toLocaleString();
-        document.getElementById("marketcap").textContent = "$" + marketCap.toLocaleString(undefined, { maximumFractionDigits: 0 });
-        document.getElementById("rebase").textContent = rebase.toFixed(2) + "%";
-        document.getElementById("burn").textContent = burn.toFixed(2) + "%";
-        document.getElementById("countdown").textContent = countdown;
-
-      } catch (err) {
-        console.error("Failed to load stats:", err);
       }
-    }
 
-    loadStats();
-    setInterval(loadStats, 15000);
-  });
-</script>
+      loadStats();
+      setInterval(loadStats, 15000);
+    });
+  </script>
+</body>
+</html>
