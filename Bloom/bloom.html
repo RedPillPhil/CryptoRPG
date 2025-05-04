@@ -88,19 +88,13 @@
     }
   }
 
-  // Initial setup: ensure countdown is set properly
+  // Initial setup: Ensure countdown is not set by default
   window.onload = () => {
     const countdownElement = document.getElementById('countdown');
-    let countdownValue = parseInt(countdownElement.textContent);
-
-    // Set countdown value if not valid
-    if (isNaN(countdownValue)) {
-      countdownValue = 60;  // Set to 60 seconds by default if invalid
-      countdownElement.textContent = countdownValue;
-    }
+    countdownElement.textContent = ""; // Ensure countdown is empty initially
   };
 
-  // Start checking countdown
+  // Start checking countdown once the countdown is initialized
   const countdownInterval = setInterval(checkCountdown, 1000);  // Checks every second
 
   // Rebase Button Functionality
@@ -110,6 +104,7 @@
     triggerRebase(); // Trigger the rebase function
   });
 </script>
+
 
 
 
