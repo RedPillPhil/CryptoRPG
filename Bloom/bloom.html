@@ -712,7 +712,7 @@
       document.getElementById("upcomingRebasePercentage").innerText = `${rate}%`;
     } catch (err) {
       console.error("Failed to fetch rebase %:", err);
-      document.getElementById("upcomingRebasePercentage").innerText = "Bloom Rate: Error";
+      document.getElementById("upcomingRebasePercentage").innerText = "Error";
     }
   }
 
@@ -747,11 +747,11 @@
     }
   }
 
-  // Auto-connect wallet and fetch stats on load
+  // Auto-connect wallet and fetch stats on page load
   window.addEventListener('load', async () => {
     await connectWallet();
     await fetchStats();
-    setInterval(fetchStats, 15000); // every 15 seconds
+    setInterval(fetchStats, 15000); // Refresh every 15 seconds
   });
 </script>
 
