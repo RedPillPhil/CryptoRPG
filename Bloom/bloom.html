@@ -27,8 +27,6 @@
 <!-- Bloom Token Stats -->
 <section>
   <ul id="bloom-stats" style="list-style: none; padding: 1em; font-family: Montserrat;">
-
-  <ul id="bloom-stats" style="list-style: none; padding: 1em; font-family: Montserrat;">
     <li id="price2">Price: $<span id="price"></span></li>
     <li>Bloom Rate: <span id="upcomingRebasePercentage">Loading...</span></li>
     <li id="basePercent">Burn Rate: <span id="burnRate"></span>%</li>
@@ -37,22 +35,34 @@
     <li id="countdown2">Next Bloom: <span id="countdown"></span></li>
     <li id="walletAddress">Wallet: Connecting...</li>
 
-    <!-- Add the Rebase Button as part of the stats list -->
+    <!-- Rebase Button Centered -->
     <li id="rebaseItem">
-      <center><button id="rebaseButton">🌸 Bloom</button></center>
+      <button id="rebaseButton" disabled>🌸 Bloom</button>
     </li>
   </ul>
+</section>
+
 
 
 <style>
-  #rebaseLayer {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 10000; /* Above everything including flower script */
-    pointer-events: auto;
+  #bloom-stats {
+    list-style: none;
+    padding: 1em;
+    font-family: Montserrat;
   }
 
+  #bloom-stats li {
+    margin-bottom: 10px; /* Add some space between list items */
+  }
+
+  /* Center the rebase button */
+  #rebaseItem {
+    display: flex;
+    justify-content: center; /* Centers the button horizontally */
+    margin-top: 20px; /* Optional: add space before the button */
+  }
+
+  /* Style the button */
   #rebaseButton {
     font-family: Montserrat, sans-serif;
     font-size: 1rem;
@@ -69,16 +79,53 @@
   #rebaseButton:hover {
     background-color: #66c;
   }
+
+  /* Disable button style */
+  #rebaseButton:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
 </style>
 
 
 <script>
+  // Disable the button by default
+  document.getElementById('rebaseButton').disabled = true;
+
+  // Function to update the countdown and handle enabling the button
+  function updateCountdown() {
+    const countdownElement = document.getElementById('countdown');
+    const countdownValue = parseInt(countdownElement.textContent); // Assuming the countdown is a number
+
+    // If countdown reaches 0, enable the button
+    if (countdownValue <= 0) {
+      document.getElementById('rebaseButton').disabled = false;
+    }
+  }
+
+  // Update countdown every second (example, adjust as needed)
+  setInterval(() => {
+    // Update countdown display, make sure it's in a number format
+    const countdownElement = document.getElementById('countdown');
+    let countdownValue = parseInt(countdownElement.textContent);
+
+    if (countdownValue > 0) {
+      countdownValue--;
+      countdownElement.textContent = countdownValue;
+    }
+    
+    // Enable button when countdown reaches 0
+    updateCountdown();
+  }, 1000);
+
+  // Make the Rebase Button functional
   document.getElementById('rebaseButton').addEventListener('click', (e) => {
-    e.stopPropagation(); // Protect against flower effect just in case
+    e.stopPropagation(); // Prevent any unwanted interaction
     console.log("Rebase button clicked!");
     triggerRebase(); // Call your rebase function here
   });
 </script>
+
 
 
 
