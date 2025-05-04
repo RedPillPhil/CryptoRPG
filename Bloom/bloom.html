@@ -1,149 +1,99 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bloom Token Stats</title>
-    <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
+  <title>Bloom Token Stats</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <style>
+    body { font-family: sans-serif; background-color: #111; color: #0f0; padding: 20px; }
+    h1 { color: #fff; }
+    .stat { margin-bottom: 10px; }
+  </style>
 </head>
 <body>
-    <h1>Bloom Token Stats</h1>
-    <div id="stats">
-        <p id="totalSupply">Total Supply: </p>
-        <p id="burnRate">Burn Rate: </p>
-        <p id="bloomRate">Bloom Rate: </p>
-        <p id="price">Price: </p>
-        <p id="marketCap">Market Cap: </p>
-        <p id="nextRebase">Time Until Next Bloom: </p>
-    </div>
-    <button id="loadDataButton">Load Token Data</button>
+  <h1>🌸 Bloom Token Dashboard</h1>
+  <div class="stat">Price: <span id="price">Loading...</span></div>
+  <div class="stat">Supply: <span id="supply">Loading...</span></div>
+  <div class="stat">Market Cap: <span id="marketcap">Loading...</span></div>
+  <div class="stat">Rebase %: <span id="rebase">Loading...</span></div>
+  <div class="stat">Burn %: <span id="burn">Loading...</span></div>
+  <div class="stat">Next Rebase In: <span id="countdown">Loading...</span></div>
 
-    <script>
-        // Set up Web3 connection and contract details
-        const contractAddress = '0x4A67A65c2fdB0397fa41eFC3896b0eCD4c2d006E';
-        const usdcAddress = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
-        const pairAddress = '0x8cccbb96e0f8d491c611dd2Ab5f45753728A167a';
-        const tokenDecimals = 6;
-        const contractABI = [
-            { "constant": true, "inputs": [], "name": "totalSupply", "outputs": [{ "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
-            { "constant": true, "inputs": [], "name": "basePercent", "outputs": [{ "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
-            { "constant": true, "inputs": [], "name": "upcomingRebasePercentage", "outputs": [{ "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
-            { "constant": false, "inputs": [], "name": "Bloom", "outputs": [{ "name": "", "type": "uint256" }], "stateMutability": "nonpayable", "type": "function" },
-            {
-                "anonymous": false,
-                "inputs": [
-                    { "indexed": true, "name": "epoch", "type": "uint256" },
-                    { "indexed": false, "name": "totalSupply", "type": "uint256" }
-                ],
-                "name": "LogRebase",
-                "type": "event"
-            }
-        ];
+  <script>
+    const provider = new ethers.providers.JsonRpcProvider("https://rpc.ankr.com/base/d41098a1457bd77208ea6662406dcdafc4567718858a40ae83788b601c854349");
 
-        let web3;
-        let contract;
+    const bloomToken = "0x4A67A65c2fdB0397fa41eFC3896b0eCD4c2d006E";
+    const usdcToken = "0xd9AA594F6EcC163A497065eAe3e01B5E3dA1c648"; // USDC on Base
+    const pairAddress = "0x8cccbb96e0f8d491c611dd2Ab5f45753728A167a"; // Bloom/USDC pair
 
-        // Set up Web3 instance when MetaMask is available
-        if (window.ethereum) {
-            web3 = new Web3(window.ethereum);
+    const bloomAbi = [
+      "function totalSupply() view returns (uint256)",
+      "function getRebasePercent() view returns (uint256)",
+      "function getBurnPercent() view returns (uint256)",
+      "function lastRebasedTime() view returns (uint256)"
+    ];
 
-            // Request access to MetaMask account
-            window.ethereum.request({ method: 'eth_requestAccounts' })
-                .then(() => {
-                    contract = new web3.eth.Contract(contractABI, contractAddress);
-                    console.log('MetaMask connected');
-                })
-                .catch((error) => {
-                    console.error('User denied account access or error occurred:', error);
-                });
+    const pairAbi = [
+      "function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)",
+      "function token0() view returns (address)",
+      "function token1() view returns (address)"
+    ];
+
+    async function loadStats() {
+      const bloom = new ethers.Contract(bloomToken, bloomAbi, provider);
+      const pair = new ethers.Contract(pairAddress, pairAbi, provider);
+
+      try {
+        const [supplyRaw, rebaseRaw, burnRaw, lastRebase] = await Promise.all([
+          bloom.totalSupply(),
+          bloom.getRebasePercent(),
+          bloom.getBurnPercent(),
+          bloom.lastRebasedTime()
+        ]);
+
+        const supply = Number(supplyRaw) / 1e6; // 6 decimals
+        const rebase = Number(rebaseRaw) / 100;
+        const burn = Number(burnRaw) / 100;
+
+        const [token0, token1] = await Promise.all([pair.token0(), pair.token1()]);
+        const [res0, res1] = await pair.getReserves();
+
+        let bloomReserve, usdcReserve;
+
+        if (token0.toLowerCase() === bloomToken.toLowerCase()) {
+          bloomReserve = Number(res0) / 1e6;
+          usdcReserve = Number(res1) / 1e6;
         } else {
-            alert("Please install MetaMask to interact with the blockchain.");
+          bloomReserve = Number(res1) / 1e6;
+          usdcReserve = Number(res0) / 1e6;
         }
 
-        // Fetch the last rebase time from the blockchain
-        async function getLastRebaseTime() {
-            const latestBlock = await web3.eth.getBlockNumber();
-            let fromBlock = latestBlock - 99999;
-            let found = false;
-            let latestEvent = null;
+        const price = usdcReserve / bloomReserve;
+        const marketCap = supply * price;
 
-            while (!found && fromBlock >= 0) {
-                const events = await contract.getPastEvents('LogRebase', {
-                    fromBlock: fromBlock,
-                    toBlock: latestBlock
-                });
+        const now = Math.floor(Date.now() / 1000);
+        const nextRebase = lastRebase + 86400;
+        const secondsLeft = Math.max(0, nextRebase - now);
 
-                if (events.length > 0) {
-                    latestEvent = events[events.length - 1];
-                    found = true;
-                } else {
-                    latestBlock = fromBlock - 1;
-                    fromBlock = latestBlock - 99999;
-                    if (fromBlock < 0) fromBlock = 0;
-                }
-            }
+        const hours = Math.floor(secondsLeft / 3600);
+        const minutes = Math.floor((secondsLeft % 3600) / 60);
+        const seconds = secondsLeft % 60;
+        const countdown = `${hours}h ${minutes}m ${seconds}s`;
 
-            if (!latestEvent) {
-                console.log('❌ No LogRebase events found.');
-                return null;
-            }
+        document.getElementById("price").textContent = "$" + price.toFixed(4);
+        document.getElementById("supply").textContent = supply.toLocaleString();
+        document.getElementById("marketcap").textContent = "$" + marketCap.toLocaleString(undefined, { maximumFractionDigits: 0 });
+        document.getElementById("rebase").textContent = rebase.toFixed(2) + "%";
+        document.getElementById("burn").textContent = burn.toFixed(2) + "%";
+        document.getElementById("countdown").textContent = countdown;
 
-            const block = await web3.eth.getBlock(latestEvent.blockNumber);
-            const lastRebaseTimestamp = block.timestamp;
-            const nextRebaseTimestamp = lastRebaseTimestamp + 24 * 60 * 60;
+      } catch (err) {
+        console.error("Failed to load stats:", err);
+        alert("Error fetching Bloom data. See console for details.");
+      }
+    }
 
-            return nextRebaseTimestamp;
-        }
-
-        // Format countdown to next rebase
-        function formatCountdown(targetTime) {
-            const now = Math.floor(Date.now() / 1000);
-            const remaining = targetTime - now;
-
-            if (remaining <= 0) return '🌸 Rebase happening now!';
-            const hours = Math.floor(remaining / 3600);
-            const minutes = Math.floor((remaining % 3600) / 60);
-            const seconds = remaining % 60;
-
-            return `${hours} hours, ${minutes} minutes, ${seconds} seconds`;
-        }
-
-        // Fetch token metrics from the contract and pair address
-        async function getMetrics() {
-            const [totalSupply, basePercent, rebasePercent, tokenBalance, usdcBalance] = await Promise.all([
-                contract.methods.totalSupply().call(),
-                contract.methods.basePercent().call(),
-                contract.methods.upcomingRebasePercentage().call(),
-                new web3.eth.Contract([{ "constant": true, "inputs": [{ "name": "_owner", "type": "address" }], "name": "balanceOf", "outputs": [{ "name": "balance", "type": "uint256" }], "type": "function" }], contractAddress).methods.balanceOf(pairAddress).call(),
-                new web3.eth.Contract([{ "constant": true, "inputs": [{ "name": "_owner", "type": "address" }], "name": "balanceOf", "outputs": [{ "name": "balance", "type": "uint256" }], "type": "function" }], usdcAddress).methods.balanceOf(pairAddress).call(),
-            ]);
-
-            const price = usdcBalance / tokenBalance;
-            const marketCap = (totalSupply / 10 ** tokenDecimals) * price;
-
-            return {
-                totalSupply: (totalSupply / 10 ** tokenDecimals).toLocaleString(),
-                burnRate: (100 / basePercent).toFixed(2),
-                bloomRate: rebasePercent,
-                price: price.toFixed(6),
-                marketCap: marketCap.toFixed(2),
-            };
-        }
-
-        // Handle button click to load token data
-        document.getElementById('loadDataButton').addEventListener('click', async () => {
-            const metrics = await getMetrics();
-            const nextRebaseTime = await getLastRebaseTime();
-            const timeUntilRebase = nextRebaseTime ? formatCountdown(nextRebaseTime) : 'Unknown';
-
-            // Display metrics in the HTML
-            document.getElementById('totalSupply').textContent = `Total Supply: ${metrics.totalSupply}`;
-            document.getElementById('burnRate').textContent = `Burn Rate: ${metrics.burnRate}%`;
-            document.getElementById('bloomRate').textContent = `Bloom Rate: ${metrics.bloomRate}%`;
-            document.getElementById('price').textContent = `Price: $${metrics.price}`;
-            document.getElementById('marketCap').textContent = `Market Cap: $${metrics.marketCap}`;
-            document.getElementById('nextRebase').textContent = `Time Until Next Bloom: ${timeUntilRebase}`;
-        });
-    </script>
+    loadStats();
+    setInterval(loadStats, 15000); // Refresh every 15 sec
+  </script>
 </body>
 </html>
