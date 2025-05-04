@@ -36,44 +36,46 @@
   <li id="countdown2">Next Bloom:  <span id="countdown"></span></li>
   <li id="walletAddress">Wallet: Connecting...</li>
 
-<div id="blockerOverlay" class="hidden"></div>
+<!-- UI Layer for Rebase Button -->
+<div id="rebaseLayer">
+  <button id="rebaseButton">🌸 Rebase</button>
+</div>
 
-<!-- Style for the overlay -->
+
 <style>
-  #blockerOverlay {
+  #rebaseLayer {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 9999;
-    background: transparent;
+    top: 20px;
+    right: 20px;
+    z-index: 10000; /* Above everything including flower script */
     pointer-events: auto;
   }
 
-  #blockerOverlay.hidden {
-    pointer-events: none;
+  #rebaseButton {
+    font-family: Montserrat, sans-serif;
+    font-size: 1rem;
+    padding: 10px 20px;
+    border-radius: 10px;
+    background-color: #88e;
+    color: white;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    transition: background-color 0.2s;
+  }
+
+  #rebaseButton:hover {
+    background-color: #66c;
   }
 </style>
 
+
 <script>
-  let countdownSeconds = 10; // Replace with real rebase countdown
-  const countdownEl = document.getElementById('countdown');
-  const overlay = document.getElementById('blockerOverlay');
-
-  const countdownInterval = setInterval(() => {
-    countdownSeconds--;
-
-    countdownEl.innerText = countdownSeconds + "s";
-
-    if (countdownSeconds <= 0) {
-      clearInterval(countdownInterval);
-
-      // Show the overlay to block all clicks below it (e.g. flower effects)
-      overlay.classList.remove('hidden');
-      console.log("Overlay activated — interactions blocked.");
-    }
-  }, 1000);
+  document.getElementById('rebaseButton').addEventListener('click', (e) => {
+    e.stopPropagation(); // Protect against flower effect just in case
+    console.log("Rebase button clicked!");
+    triggerRebase(); // Call your rebase function here
+  });
 </script>
 
 
