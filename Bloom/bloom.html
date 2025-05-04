@@ -99,9 +99,10 @@
 
   // Rebase Button Functionality
   document.getElementById('rebaseButton').addEventListener('click', (e) => {
-    e.stopPropagation(); // Prevent flower effect just in case
+    e.stopImmediatePropagation();  // Block flower script
+    e.preventDefault();            // Stop default behavior
     console.log("Rebase button clicked!");
-    triggerRebase(); // Trigger the rebase function
+    triggerRebase();               // Call your rebase logic
   });
 </script>
 
