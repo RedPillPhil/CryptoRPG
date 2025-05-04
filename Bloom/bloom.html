@@ -71,34 +71,6 @@
 
 <div id="bloomZone"></div>
 
-<script>
-  const bloomZone = document.getElementById('bloomZone');
-  let bloomCooldown = false;
-
-  // Replace this with your actual bloom function
-  async function callBloomFunction() {
-    console.log("🌸 Calling bloom function...");
-    // Example: use your real blockchain call here
-    return new Promise(resolve => setTimeout(resolve, 1000)); // Simulate bloom
-  }
-
-  bloomZone.addEventListener('click', () => {
-    if (bloomCooldown) return;
-    bloomCooldown = true;
-
-    setTimeout(async () => {
-      try {
-        await callBloomFunction();
-        console.log("✅ Bloom triggered.");
-      } catch (err) {
-        console.error("❌ Bloom failed:", err);
-      } finally {
-        bloomCooldown = false; // Reset cooldown for repeat testing
-      }
-    }, 2000); // Simulated delay
-  });
-</script>
-
 
 
 <!-- Footer -->
