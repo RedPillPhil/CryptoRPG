@@ -660,13 +660,6 @@
       }
     ], lpPairAddress);
 
-  const bloomTokenAddress = "0x4A67A65c2fdB0397fa41eFC3896b0eCD4c2d006E";
-  const lpAddress = "0x8cccbb96e0f8d491c611dd2Ab5f45753728A167a";
-  const rpc = "https://rpc.ankr.com/base/d41098a1457bd77208ea6662406dcdafc4567718858a40ae83788b601c854349";
-
-  const web3 = new Web3(new Web3.providers.HttpProvider(rpc));
-  const bloom = new web3.eth.Contract(bloomAbi, bloomTokenAddress);
-  const lp = new web3.eth.Contract(lpAbi, lpAddress);
 
   async function fetchStats() {
     try {
