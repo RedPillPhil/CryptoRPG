@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="./style.css">
   <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.0.3/chroma.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers/dist/ethers.min.js"></script>
 </head>
 <body>
 
@@ -25,29 +26,96 @@
 </header>
 
 <!-- Bloom Token Stats -->
-<section>
-  <ul id="bloom-stats" style="list-style: none; padding: 1em; font-family: Montserrat;">
-<!-- 
-  <li id="price">Price: Loading...</li>
-  <li id="upcomingRebasePercentage">Rebase: Loading...</li>
-  <li id="basePercent">Burn: Loading...</li>
-  <li id="totalSupply2">Supply: Loading...</li>
-  <li id="marketCap2">Market Cap: Loading...</li>
-  <li id="countdown2">Next Bloom: Loading...</li>
-  <li id="walletAddress">Wallet: Connecting...</li>
--->
+  <script src="https://cdn.jsdelivr.net/npm/ethers/dist/ethers.min.js"></script>
+  <style>
+    #bloom-stats {
+      list-style: none;
+      padding: 1em;
+      font-family: Montserrat, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <section>
+    <ul id="bloom-stats">
+      <li id="price">Price: Loading...</li>
+      <li id="bloomRate">Bloom Rate: Loading...</li>
+      <li id="burnRate">Burn Rate: Loading...</li>
+      <li id="totalSupply">Total Supply: Loading...</li>
+      <li id="marketCap">Market Cap: Loading...</li>
+      <li id="countdown">Time Until Next Bloom: Loading...</li>
+    </ul>
+  </section>
 
-  <li id="price">Price: $23.02</li>
-  <li id="upcomingRebasePercentage">Bloom Rate: 10%</li>
-  <li id="basePercent">Burn: 0.5</li>
-  <li id="totalSupply2">Supply: 99.521494 BLOOM</li>
-  <li id="marketCap2">Market Cap: $2300</li>
-  <li id="countdown2">Next Bloom: 17h 34m 03s.</li>
-  <li id="walletAddress">Wallet: Connecting...</li>
+  <script>
+    const provider = new ethers.providers.JsonRpcProvider("https://rpc.ankr.com/base/d41098a1457bd77208ea6662406dcdafc4567718858a40ae83788b601c854349");
+    const tokenAddress = "0x4A67A65c2fdB0397fa41eFC3896b0eCD4c2d006E";
+    const usdcAddress = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+    const pairAddress = "0x8cccbb96e0f8d491c611dd2Ab5f45753728A167a";
+    const tokenDecimals = 6;
 
+    const abi = [
+      "function totalSupply() view returns (uint256)",
+      "function basePercent() view returns (uint256)",
+      "function upcomingRebasePercentage() view returns (uint256)",
+      "event LogRebase(uint256 epoch, uint256 totalSupply)"
+    ];
+    const erc20ABI = [
+      "function balanceOf(address) view returns (uint256)"
+    ];
 
-  </ul>
-</section>
+    const token = new ethers.Contract(tokenAddress, abi, provider);
+    const tokenContract = new ethers.Contract(tokenAddress, erc20ABI, provider);
+    const usdcContract = new ethers.Contract(usdcAddress, erc20ABI, provider);
+
+    async function getLastRebaseTime() {
+      const currentBlock = await provider.getBlockNumber();
+      const events = await token.queryFilter("LogRebase", currentBlock - 100000, currentBlock);
+      const latest = events.pop();
+      if (!latest) return null;
+      const block = await provider.getBlock(latest.blockNumber);
+      return block.timestamp + 86400;
+    }
+
+    function formatCountdown(targetTime) {
+      const now = Math.floor(Date.now() / 1000);
+      const remaining = targetTime - now;
+      if (remaining <= 0) return '🌸 Rebase happening now!';
+      const h = Math.floor(remaining / 3600);
+      const m = Math.floor((remaining % 3600) / 60);
+      const s = remaining % 60;
+      return `${h} hours, ${m} minutes, ${s} seconds`;
+    }
+
+    async function loadStats() {
+      const [supply, burnRaw, bloomRate, tokenBal, usdcBal, nextRebase] = await Promise.all([
+        token.totalSupply(),
+        token.basePercent(),
+        token.upcomingRebasePercentage(),
+        tokenContract.balanceOf(pairAddress),
+        usdcContract.balanceOf(pairAddress),
+        getLastRebaseTime()
+      ]);
+
+      const price = parseFloat(ethers.utils.formatUnits(usdcBal, tokenDecimals)) / parseFloat(ethers.utils.formatUnits(tokenBal, tokenDecimals));
+      const formattedSupply = parseFloat(ethers.utils.formatUnits(supply, tokenDecimals)).toLocaleString();
+      const marketCap = (parseFloat(ethers.utils.formatUnits(supply, tokenDecimals)) * price).toFixed(2);
+      const burnRate = (100 / burnRaw).toFixed(2);
+      const bloomRateFormatted = parseFloat(bloomRate).toFixed(2);
+
+      document.getElementById("price").innerText = `💵 Price: $${price.toFixed(6)}`;
+      document.getElementById("bloomRate").innerText = `📈 Bloom Rate: ${bloomRateFormatted}%`;
+      document.getElementById("burnRate").innerText = `🔥 Burn Rate: ${burnRate}%`;
+      document.getElementById("totalSupply").innerText = `🪙 Total Supply: ${formattedSupply} BLOOM`;
+      document.getElementById("marketCap").innerText = `📊 Market Cap: $${marketCap}`;
+      document.getElementById("countdown").innerText = `⏳ Time Until Next Bloom: ${formatCountdown(nextRebase)}`;
+    }
+
+    loadStats();
+    setInterval(loadStats, 60000); // refresh every 60s
+  </script>
+</body>
+
 
 <!-- Footer -->
 <footer>
